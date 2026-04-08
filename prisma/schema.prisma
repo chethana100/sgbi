@@ -1,0 +1,228 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String         @id @default(uuid())
+  name            String
+  email           String         @unique
+  emailVerified   Boolean        @default(false)
+  image           String?
+  password_hash   String?
+  role            Role           @default(field_user)
+  approval_status ApprovalStatus @default(pending)
+  approved_by     String?
+  approved_at     DateTime?
+  last_login_at   DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  audit_logs       AuditLog[]
+  checkout_records CheckoutRecord[]
+  sessions         Session[]
+  accounts         Account[]
+
+  @@map("user")
+}
+
+model Product {
+  product_id      String      @id @default(uuid())
+  product_name    String
+  product_type    ProductType
+  erp_part_number String      @unique
+  description     String?
+  serial_prefix   String?
+  is_active       Boolean     @default(true)
+  created_at      DateTime    @default(now())
+
+  assets          Asset[]
+  firmware_master FirmwareMaster?
+}
+
+model Asset {
+  asset_id                       String            @id @default(uuid())
+  product_id                     String
+  product_name                   String
+  product_type                   ProductType
+  erp_part_number                String
+  serial_number                  String
+  current_firmware               String?
+  last_firmware_update_date      DateTime?
+  last_firmware_updated_by       String?
+  current_location_id            String?
+  current_location_display       String?
+  customer                       String?
+  operational_status             OperationalStatus @default(Working)
+  last_service_date              DateTime?
+  service_reminder_interval_days Int               @default(180)
+  checked_out_to_user_id         String?
+  checked_out_at                 DateTime?
+  checked_out_purpose            String?
+  warranty_expiry_date           DateTime?
+  warranty_notes                 String?
+  image_urls                     String[]
+  remarks                        String?
+  enrolled_by                    String
+  enrolled_at                    DateTime          @default(now())
+  last_modified_by               String
+  last_modified_at               DateTime          @updatedAt
+  is_deleted                     Boolean           @default(false)
+
+  product          Product          @relation(fields: [product_id], references: [product_id])
+  location         Location?        @relation(fields: [current_location_id], references: [location_id])
+  audit_logs       AuditLog[]
+  checkout_records CheckoutRecord[]
+
+  @@unique([product_id, serial_number])
+}
+
+model FirmwareMaster {
+  firmware_master_id String   @id @default(uuid())
+  product_id         String   @unique
+  latest_version     String
+  release_notes      String?
+  updated_by         String
+  updated_at         DateTime @updatedAt
+
+  product Product @relation(fields: [product_id], references: [product_id])
+}
+
+model Location {
+  location_id        String   @id @default(uuid())
+  name               String
+  parent_location_id String?
+  full_path          String?
+  is_active          Boolean  @default(true)
+  created_by         String
+  created_at         DateTime @default(now())
+
+  parent   Location?  @relation("LocationTree", fields: [parent_location_id], references: [location_id])
+  children Location[] @relation("LocationTree")
+  assets   Asset[]
+}
+
+model CheckoutRecord {
+  checkout_id            String    @id @default(uuid())
+  asset_id               String
+  checked_out_by_user_id String
+  checked_out_at         DateTime  @default(now())
+  purpose                String?
+  checked_in_by_user_id  String?
+  checked_in_at          DateTime?
+  expected_return_date   DateTime?
+
+  asset          Asset @relation(fields: [asset_id], references: [asset_id])
+  checked_out_by User  @relation(fields: [checked_out_by_user_id], references: [id])
+}
+
+model AuditLog {
+  log_id               String     @id @default(uuid())
+  asset_id             String?
+  performed_by_user_id String
+  action_type          ActionType
+  previous_value       Json?
+  new_value            Json?
+  notes                String?
+  performed_at         DateTime   @default(now())
+  client_app_version   String?
+
+  asset        Asset? @relation(fields: [asset_id], references: [asset_id])
+  performed_by User   @relation(fields: [performed_by_user_id], references: [id])
+}
+
+enum Role {
+  admin
+  field_user
+}
+
+enum ApprovalStatus {
+  pending
+  approved
+  revoked
+}
+
+enum ProductType {
+  main_product
+  accessory
+}
+
+enum OperationalStatus {
+  Working
+  Repair
+  Scrap
+}
+
+enum ActionType {
+  ASSET_ENROLLED
+  ASSET_STATUS_CHANGED
+  ASSET_LOCATION_CHANGED
+  ASSET_FIRMWARE_UPDATED
+  ASSET_SERVICE_RESET
+  ASSET_REMARKS_UPDATED
+  ASSET_CHECKED_OUT
+  ASSET_CHECKED_IN
+  ASSET_WARRANTY_UPDATED
+  ASSET_IMAGE_UPLOADED
+  ASSET_IMAGE_DELETED
+  FIRMWARE_MASTER_UPDATED
+  USER_APPROVED
+  USER_ROLE_CHANGED
+  PRODUCT_ADDED
+  LOCATION_ADDED
+  LOCATION_EDITED
+  BACKUP_TRIGGERED
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
