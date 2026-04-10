@@ -96,11 +96,7 @@ export default function Home() {
             </div>
           </div>
         )
-      ) : (
-        <div className="w-full px-6 flex justify-center animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out fill-mode-both delay-150">
-           <AuthForms />
-        </div>
-      )}
+      ) : null}
       
       <div className="fixed bottom-0 pointer-events-none w-full h-1/2 bg-gradient-to-t from-zinc-50 dark:from-zinc-950 to-transparent -z-10" />
     </div>

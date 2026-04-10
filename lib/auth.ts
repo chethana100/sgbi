@@ -1,15 +1,11 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { prisma } from "./prisma";
-import { APIError } from "better-auth/api";
+import { prisma } from "@/lib/prisma";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-  emailAndPassword: {
-    enabled: true,
-  },
   user: {
     additionalFields: {
       role: {
@@ -24,24 +20,12 @@ export const auth = betterAuth({
       },
     },
   },
-  databaseHooks: {
-    user: {
-      create: {
-        before: async (user) => {
-          if (!user.email.endsWith("@sgbi.us")) {
-            throw new APIError("FORBIDDEN", {
-              message: "Authentication Failed: Only @sgbi.us email addresses are currently permitted for new SGBI enrollments.",
-            });
-          }
-          return {
-            data: {
-              ...user,
-              role: "field_user",
-              approval_status: "pending",
-            },
-          };
-        },
-      },
-    },
+  session: {
+    expiresIn: 60 * 60 * 8,        // 8 hours (as per SRD)
+    updateAge: 60 * 60,
+  },
+  emailAndPassword: {
+    enabled: true,
+    minPasswordLength: 8,
   },
 });
