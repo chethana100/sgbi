@@ -3,7 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     try {
         const session = await auth.api.getSession({ headers: await headers() }) as any;
         if (!session) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
@@ -15,7 +16,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         }
 
         const updated = await prisma.user.update({
-            where: { id: params.id },
+            where: { id },
             data: { role },
         });
 
@@ -23,7 +24,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
             data: {
                 performed_by_user_id: session.user.id,
                 action_type: "USER_ROLE_CHANGED",
-                new_value: { userId: params.id, role } as any,
+                new_value: { userId: id, role } as any,
             },
         });
 

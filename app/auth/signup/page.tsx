@@ -18,15 +18,18 @@ export default function SignupPage() {
     display_name: "", email: "", password: "", confirm_password: "",
   });
 
+  const emailIsValid = form.email && form.email.endsWith("@sgbi.us");
+  const passwordIsValid = form.password && form.password.length >= 8;
   const passwordsMatch = form.password && form.confirm_password && form.password === form.confirm_password;
-  const passwordTooShort = form.password && form.password.length < 8;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!form.email.endsWith("@sgbi.us")) { setError("Only @sgbi.us email addresses are allowed."); return; }
-    if (form.password.length < 8) { setError("Password must be at least 8 characters."); return; }
-    if (form.password !== form.confirm_password) { setError("Passwords do not match."); return; }
+    
+    if (!emailIsValid) { setError("Only @sgbi.us email addresses are allowed."); return; }
+    if (!passwordIsValid) { setError("Password must be at least 8 characters."); return; }
+    if (!passwordsMatch) { setError("Passwords do not match."); return; }
+
     setIsLoading(true);
     try {
       const { data, error: authError } = await signUp.email({
@@ -41,7 +44,7 @@ export default function SignupPage() {
         setSuccess(true); 
       }
     } catch { 
-      setError("Something went wrong."); 
+      setError("Something went wrong. Please try again."); 
     } finally { 
       setIsLoading(false); 
     }
@@ -51,15 +54,17 @@ export default function SignupPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-8">
         <div className="w-full max-w-sm text-center space-y-6">
-          <CheckCircle2 size={56} className="mx-auto text-[#4169e1]" />
+          <div className="w-16 h-16 bg-blue-50 text-[#4169e1] rounded-full flex items-center justify-center mx-auto">
+            <CheckCircle2 size={32} />
+          </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold">Request submitted</h2>
-            <p className="text-muted-foreground text-sm">
+            <h2 className="text-2xl font-semibold">Account Request Submitted</h2>
+            <p className="text-muted-foreground text-sm leading-relaxed">
               Your account request has been submitted. An administrator will review and approve your access.
             </p>
           </div>
-          <Link href="/auth/login">
-            <Button variant="outline" className="w-full">Back to login</Button>
+          <Link href="/auth/login" className="block">
+            <Button variant="outline" className="w-full h-11">Back to sign in</Button>
           </Link>
         </div>
       </div>
@@ -73,90 +78,137 @@ export default function SignupPage() {
         <SgbiLogo />
         <div className="space-y-4">
           <h1 className="text-4xl font-semibold leading-tight">Join the SGBI<br />Asset Platform</h1>
-          <p className="text-white/60 text-lg max-w-sm">
-            Request access to start tracking SGBI hardware assets across all locations.
+          <p className="text-white/60 text-lg max-w-sm font-light">
+            Request access to track hardware assets across all locations.
           </p>
-          <ul className="space-y-2 text-white/50 text-sm">
-            {["Real-time asset status and location", "Firmware update tracking", "Service history and reminders"]
+          <div className="space-y-3 pt-4">
+            {["Real-time asset tracking", "Firmware update management", "Full audit history"]
               .map((item) => (
-                <li key={item} className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#60c8f5]" />{item}
-                </li>
+                <div key={item} className="flex items-center gap-3 text-white/70">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#4169e1]" />
+                  <span className="text-sm font-medium">{item}</span>
+                </div>
               ))}
-          </ul>
+          </div>
         </div>
-        <p className="text-white/30 text-sm">© {new Date().getFullYear()} SGBI Inc. · Internal Use Only</p>
+        <p className="text-white/30 text-xs font-medium uppercase tracking-wider">© {new Date().getFullYear()} SGBI Inc. · INTERNAL USE ONLY</p>
       </div>
 
       {/* Right — Form */}
       <div className="flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-sm space-y-8">
-          <div className="lg:hidden flex justify-center"><SgbiLogo /></div>
+          <div className="lg:hidden flex justify-center mb-8"><SgbiLogo /></div>
           <div>
-            <h2 className="text-2xl font-semibold text-foreground">Create account</h2>
-            <p className="text-muted-foreground text-sm">
-              Use your <span className="font-medium text-foreground">@sgbi.us</span> email to request access
+            <h2 className="text-2xl font-semibold">Create account</h2>
+            <p className="text-muted-foreground text-sm mt-1">
+              Use your <span className="font-semibold text-foreground">@sgbi.us</span> email to request access
             </p>
           </div>
+          
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="display_name">Full name</Label>
-              <Input id="display_name" placeholder="Jane Smith"
-                value={form.display_name} onChange={(e) => setForm({ ...form, display_name: e.target.value })} required />
+              <Input 
+                id="display_name" 
+                placeholder="Jane Smith"
+                className="h-11"
+                value={form.display_name} 
+                onChange={(e) => setForm({ ...form, display_name: e.target.value })} 
+                required 
+              />
             </div>
+            
             <div className="space-y-2">
               <Label htmlFor="email">Email address</Label>
-              <Input id="email" type="email" placeholder="you@sgbi.us"
-                value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-              {form.email && !form.email.endsWith("@sgbi.us") && (
-                <p className="text-xs text-destructive">Must be a @sgbi.us email address</p>
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="you@sgbi.us"
+                className={`h-11 ${form.email && !emailIsValid ? "border-destructive ring-destructive/20" : ""}`}
+                value={form.email} 
+                onChange={(e) => setForm({ ...form, email: e.target.value })} 
+                required 
+              />
+              {form.email && !emailIsValid && (
+                <p className="text-[11px] font-medium text-destructive">Email must end with @sgbi.us</p>
               )}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
-                <Input id="password" type={showPassword ? "text" : "password"}
-                  placeholder="Min. 8 characters" className="pr-10"
-                  value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
-                <button type="button" tabIndex={-1} onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                <Input 
+                  id="password" 
+                  type={showPassword ? "text" : "password"}
+                  placeholder="At least 8 characters" 
+                  className={`h-11 pr-10 ${form.password && !passwordIsValid ? "border-destructive ring-destructive/20" : ""}`}
+                  value={form.password} 
+                  onChange={(e) => setForm({ ...form, password: e.target.value })} 
+                  required 
+                />
+                <button 
+                  type="button" 
+                  tabIndex={-1} 
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground outline-none"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {passwordTooShort && <p className="text-xs text-destructive">Minimum 8 characters</p>}
+              {form.password && !passwordIsValid && (
+                <p className="text-[11px] font-medium text-destructive">Minimum 8 characters required</p>
+              )}
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="confirm_password">Confirm password</Label>
               <div className="relative">
-                <Input id="confirm_password" type={showConfirm ? "text" : "password"}
-                  placeholder="Re-enter password" className="pr-10"
-                  value={form.confirm_password} onChange={(e) => setForm({ ...form, confirm_password: e.target.value })} required />
-                <button type="button" tabIndex={-1} onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                  {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                <Input 
+                  id="confirm_password" 
+                  type={showConfirm ? "text" : "password"}
+                  placeholder="Re-enter password" 
+                  className={`h-11 pr-10 ${form.confirm_password && !passwordsMatch ? "border-destructive ring-destructive/20" : ""}`}
+                  value={form.confirm_password} 
+                  onChange={(e) => setForm({ ...form, confirm_password: e.target.value })} 
+                  required 
+                />
+                <button 
+                  type="button" 
+                  tabIndex={-1} 
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground outline-none"
+                >
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
               {form.confirm_password && !passwordsMatch && (
-                <p className="text-xs text-destructive">Passwords do not match</p>
-              )}
-              {passwordsMatch && (
-                <p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
-                  <CheckCircle2 size={12} /> Passwords match
-                </p>
+                <p className="text-[11px] font-medium text-destructive">Passwords do not match</p>
               )}
             </div>
+
             {error && (
-              <div className="rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3">
-                <p className="text-sm text-destructive">{error}</p>
+              <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3">
+                <p className="text-sm font-medium text-destructive">{error}</p>
               </div>
             )}
-            <Button type="submit" className="w-full bg-[#4169e1] hover:bg-[#3358cc] text-white" disabled={isLoading}>
-              {isLoading ? <><Loader2 size={16} className="mr-2 animate-spin" />Submitting...</> : "Request access"}
+
+            <Button 
+              type="submit" 
+              className="w-full h-11 bg-[#4169e1] hover:bg-[#3358cc] text-white font-medium" 
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 size={18} className="animate-spin" />
+                  <span>Submitting...</span>
+                </div>
+              ) : "Request Access"}
             </Button>
           </form>
+
           <p className="text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/auth/login" className="text-[#4169e1] hover:underline font-medium">Sign in</Link>
+            <Link href="/auth/login" className="text-[#4169e1] hover:underline font-semibold">Sign in</Link>
           </p>
         </div>
       </div>

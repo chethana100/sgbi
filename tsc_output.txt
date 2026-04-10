@@ -1,0 +1,50 @@
+.next/dev/types/validator.ts(135,31): error TS2344: Type 'typeof import("/home/sgbi/Desktop/sgbi-asset-tracker/app/api/assets/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/assets/[id]">'.
+  Types of property 'GET' are incompatible.
+    Type '(_req: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ success: boolean; message: string; }> | NextResponse<{ success: boolean; data: { firmware_update_available: boolean; ... 27 more ...; is_deleted: boolean; }; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/dev/types/validator.ts(189,31): error TS2344: Type 'typeof import("/home/sgbi/Desktop/sgbi-asset-tracker/app/api/firmware-master/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/firmware-master/[id]">'.
+  Types of property 'PUT' are incompatible.
+    Type '(req: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ success: boolean; message: string; }> | NextResponse<{ success: boolean; data: { product_id: string; ... 4 more ...; updated_at: Date; }; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/dev/types/validator.ts(207,31): error TS2344: Type 'typeof import("/home/sgbi/Desktop/sgbi-asset-tracker/app/api/locations/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/locations/[id]">'.
+  Types of property 'PATCH' are incompatible.
+    Type '(req: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ success: boolean; message: string; }> | NextResponse<{ success: boolean; data: { full_path: string; ... 5 more ...; created_by: string; }; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+app/(dashboard)/admin/firmware/page.tsx(248,26): error TS2304: Cannot find name 'Edit2'.
+app/(dashboard)/admin/products/page.tsx(283,20): error TS2552: Cannot find name 'Select'. Did you mean 'onselect'?
+app/(dashboard)/admin/products/page.tsx(283,68): error TS7006: Parameter 'val' implicitly has an 'any' type.
+app/(dashboard)/admin/products/page.tsx(284,22): error TS2304: Cannot find name 'SelectTrigger'.
+app/(dashboard)/admin/products/page.tsx(285,24): error TS2304: Cannot find name 'SelectValue'.
+app/(dashboard)/admin/products/page.tsx(286,23): error TS2304: Cannot find name 'SelectTrigger'.
+app/(dashboard)/admin/products/page.tsx(287,22): error TS2304: Cannot find name 'SelectContent'.
+app/(dashboard)/admin/products/page.tsx(288,24): error TS2304: Cannot find name 'SelectItem'.
+app/(dashboard)/admin/products/page.tsx(288,70): error TS2304: Cannot find name 'SelectItem'.
+app/(dashboard)/admin/products/page.tsx(289,24): error TS2304: Cannot find name 'SelectItem'.
+app/(dashboard)/admin/products/page.tsx(289,64): error TS2304: Cannot find name 'SelectItem'.
+app/(dashboard)/admin/products/page.tsx(290,23): error TS2304: Cannot find name 'SelectContent'.
+app/(dashboard)/admin/products/page.tsx(291,21): error TS2552: Cannot find name 'Select'. Did you mean 'onselect'?
+app/(dashboard)/assets/new/page.tsx(176,49): error TS2322: Type '(productId: string) => void' is not assignable to type '(value: string | null, eventDetails: SelectRootChangeEventDetails) => void'.
+  Types of parameters 'productId' and 'value' are incompatible.
+    Type 'string | null' is not assignable to type 'string'.
+      Type 'null' is not assignable to type 'string'.
+app/(dashboard)/assets/new/page.tsx(226,90): error TS2345: Argument of type '(prev: { product_id: string; serial_number: string; current_location_id: string; customer: string; current_firmware: string; operational_status: string; remarks: string; }) => { current_location_id: string | null; ... 5 more ...; remarks: string; }' is not assignable to parameter of type 'SetStateAction<{ product_id: string; serial_number: string; current_location_id: string; customer: string; current_firmware: string; operational_status: string; remarks: string; }>'.
+  Type '(prev: { product_id: string; serial_number: string; current_location_id: string; customer: string; current_firmware: string; operational_status: string; remarks: string; }) => { current_location_id: string | null; ... 5 more ...; remarks: string; }' is not assignable to type '(prevState: { product_id: string; serial_number: string; current_location_id: string; customer: string; current_firmware: string; operational_status: string; remarks: string; }) => { product_id: string; ... 5 more ...; remarks: string; }'.
+    Call signature return types '{ current_location_id: string | null; product_id: string; serial_number: string; customer: string; current_firmware: string; operational_status: string; remarks: string; }' and '{ product_id: string; serial_number: string; current_location_id: string; customer: string; current_firmware: string; operational_status: string; remarks: string; }' are incompatible.
+      The types of 'current_location_id' are incompatible between these types.
+        Type 'string | null' is not assignable to type 'string'.
+          Type 'null' is not assignable to type 'string'.
+app/(dashboard)/assets/new/page.tsx(249,89): error TS2345: Argument of type '(prev: { product_id: string; serial_number: string; current_location_id: string; customer: string; current_firmware: string; operational_status: string; remarks: string; }) => { operational_status: string | null; ... 5 more ...; remarks: string; }' is not assignable to parameter of type 'SetStateAction<{ product_id: string; serial_number: string; current_location_id: string; customer: string; current_firmware: string; operational_status: string; remarks: string; }>'.
+  Type '(prev: { product_id: string; serial_number: string; current_location_id: string; customer: string; current_firmware: string; operational_status: string; remarks: string; }) => { operational_status: string | null; ... 5 more ...; remarks: string; }' is not assignable to type '(prevState: { product_id: string; serial_number: string; current_location_id: string; customer: string; current_firmware: string; operational_status: string; remarks: string; }) => { product_id: string; ... 5 more ...; remarks: string; }'.
+    Call signature return types '{ operational_status: string | null; product_id: string; serial_number: string; current_location_id: string; customer: string; current_firmware: string; remarks: string; }' and '{ product_id: string; serial_number: string; current_location_id: string; customer: string; current_firmware: string; operational_status: string; remarks: string; }' are incompatible.
+      The types of 'operational_status' are incompatible between these types.
+        Type 'string | null' is not assignable to type 'string'.
+          Type 'null' is not assignable to type 'string'.
