@@ -6,7 +6,7 @@ import { Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signUp } from "@/lib/auth-client";
+import { signUp, authClient } from "@/lib/auth-client";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -18,17 +18,17 @@ export default function SignupPage() {
     display_name: "", email: "", password: "", confirm_password: "",
   });
 
-  const emailIsValid = form.email && form.email.endsWith("@sgbi.us");
-  const passwordIsValid = form.password && form.password.length >= 8;
-  const passwordsMatch = form.password && form.confirm_password && form.password === form.confirm_password;
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
-    if (!emailIsValid) { setError("Only @sgbi.us email addresses are allowed."); return; }
-    if (!passwordIsValid) { setError("Password must be at least 8 characters."); return; }
-    if (!passwordsMatch) { setError("Passwords do not match."); return; }
+
+    if (!form.display_name) { setError("Full name is required."); return; }
+    if (!form.email.trim().toLowerCase().endsWith("@sgbi.us")) {
+      setError("Only @sgbi.us email addresses are allowed.");
+      return;
+    }
+    if (form.password.length < 8) { setError("Password must be at least 8 characters."); return; }
+    if (form.password !== form.confirm_password) { setError("Passwords do not match."); return; }
 
     setIsLoading(true);
     try {
@@ -37,16 +37,20 @@ export default function SignupPage() {
         password: form.password,
         name: form.display_name,
       });
-      
-      if (authError) { 
-        setError(authError.message || "Signup failed."); 
-      } else { 
-        setSuccess(true); 
+
+      if (authError) {
+        setError(authError.message || "Signup failed. Please try again.");
+        return;
       }
-    } catch { 
-      setError("Something went wrong. Please try again."); 
-    } finally { 
-      setIsLoading(false); 
+
+      // Sign out immediately — user must wait for admin approval
+      await authClient.signOut();
+      setSuccess(true);
+
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -58,13 +62,13 @@ export default function SignupPage() {
             <CheckCircle2 size={32} />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold">Account Request Submitted</h2>
+            <h2 className="text-2xl font-semibold">Request Submitted!</h2>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Your account request has been submitted. An administrator will review and approve your access.
+              Your account request has been submitted successfully. An administrator will review and approve your access. You will be able to log in once approved.
             </p>
           </div>
           <Link href="/auth/login" className="block">
-            <Button variant="outline" className="w-full h-11">Back to sign in</Button>
+            <Button variant="outline" className="w-full h-11">Back to Sign In</Button>
           </Link>
         </div>
       </div>
@@ -77,21 +81,24 @@ export default function SignupPage() {
       <div className="hidden lg:flex flex-col justify-between p-12 bg-[#1a1f36] text-white">
         <SgbiLogo />
         <div className="space-y-4">
-          <h1 className="text-4xl font-semibold leading-tight">Join the SGBI<br />Asset Platform</h1>
+          <h1 className="text-4xl font-semibold leading-tight">
+            Join the SGBI<br />Asset Platform
+          </h1>
           <p className="text-white/60 text-lg max-w-sm font-light">
             Request access to track hardware assets across all locations.
           </p>
           <div className="space-y-3 pt-4">
-            {["Real-time asset tracking", "Firmware update management", "Full audit history"]
-              .map((item) => (
-                <div key={item} className="flex items-center gap-3 text-white/70">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#4169e1]" />
-                  <span className="text-sm font-medium">{item}</span>
-                </div>
-              ))}
+            {["Real-time asset tracking", "Firmware update management", "Full audit history"].map((item) => (
+              <div key={item} className="flex items-center gap-3 text-white/70">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#4169e1]" />
+                <span className="text-sm font-medium">{item}</span>
+              </div>
+            ))}
           </div>
         </div>
-        <p className="text-white/30 text-xs font-medium uppercase tracking-wider">© {new Date().getFullYear()} SGBI Inc. · INTERNAL USE ONLY</p>
+        <p className="text-white/30 text-xs font-medium uppercase tracking-wider">
+          © {new Date().getFullYear()} SGBI Inc. · INTERNAL USE ONLY
+        </p>
       </div>
 
       {/* Right — Form */}
@@ -104,86 +111,77 @@ export default function SignupPage() {
               Use your <span className="font-semibold text-foreground">@sgbi.us</span> email to request access
             </p>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="display_name">Full name</Label>
-              <Input 
-                id="display_name" 
+              <Input
+                id="display_name"
                 placeholder="Jane Smith"
                 className="h-11"
-                value={form.display_name} 
-                onChange={(e) => setForm({ ...form, display_name: e.target.value })} 
-                required 
+                value={form.display_name}
+                onChange={(e) => setForm({ ...form, display_name: e.target.value })}
+                required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="email">Email address</Label>
-              <Input 
-                id="email" 
-                type="email" 
+              <Input
+                id="email"
+                type="email"
                 placeholder="you@sgbi.us"
-                className={`h-11 ${form.email && !emailIsValid ? "border-destructive ring-destructive/20" : ""}`}
-                value={form.email} 
-                onChange={(e) => setForm({ ...form, email: e.target.value })} 
-                required 
+                className="h-11"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
               />
-              {form.email && !emailIsValid && (
-                <p className="text-[11px] font-medium text-destructive">Email must end with @sgbi.us</p>
-              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
-                <Input 
-                  id="password" 
+                <Input
+                  id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="At least 8 characters" 
-                  className={`h-11 pr-10 ${form.password && !passwordIsValid ? "border-destructive ring-destructive/20" : ""}`}
-                  value={form.password} 
-                  onChange={(e) => setForm({ ...form, password: e.target.value })} 
-                  required 
+                  placeholder="At least 8 characters"
+                  className="h-11 pr-10"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  required
                 />
-                <button 
-                  type="button" 
-                  tabIndex={-1} 
+                <button
+                  type="button"
+                  tabIndex={-1}
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground outline-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {form.password && !passwordIsValid && (
-                <p className="text-[11px] font-medium text-destructive">Minimum 8 characters required</p>
-              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirm_password">Confirm password</Label>
               <div className="relative">
-                <Input 
-                  id="confirm_password" 
+                <Input
+                  id="confirm_password"
                   type={showConfirm ? "text" : "password"}
-                  placeholder="Re-enter password" 
-                  className={`h-11 pr-10 ${form.confirm_password && !passwordsMatch ? "border-destructive ring-destructive/20" : ""}`}
-                  value={form.confirm_password} 
-                  onChange={(e) => setForm({ ...form, confirm_password: e.target.value })} 
-                  required 
+                  placeholder="Re-enter password"
+                  className="h-11 pr-10"
+                  value={form.confirm_password}
+                  onChange={(e) => setForm({ ...form, confirm_password: e.target.value })}
+                  required
                 />
-                <button 
-                  type="button" 
-                  tabIndex={-1} 
+                <button
+                  type="button"
+                  tabIndex={-1}
                   onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground outline-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {form.confirm_password && !passwordsMatch && (
-                <p className="text-[11px] font-medium text-destructive">Passwords do not match</p>
-              )}
             </div>
 
             {error && (
@@ -192,9 +190,9 @@ export default function SignupPage() {
               </div>
             )}
 
-            <Button 
-              type="submit" 
-              className="w-full h-11 bg-[#4169e1] hover:bg-[#3358cc] text-white font-medium" 
+            <Button
+              type="submit"
+              className="w-full h-11 bg-[#4169e1] hover:bg-[#3358cc] text-white font-medium"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -208,7 +206,9 @@ export default function SignupPage() {
 
           <p className="text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/auth/login" className="text-[#4169e1] hover:underline font-semibold">Sign in</Link>
+            <Link href="/auth/login" className="text-[#4169e1] hover:underline font-semibold">
+              Sign in
+            </Link>
           </p>
         </div>
       </div>
