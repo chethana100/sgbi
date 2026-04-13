@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -28,6 +29,7 @@ interface Asset {
   asset_id: string;
   product_name: string;
   serial_number: string;
+  pcb_version: string | null;
   erp_part_number: string;
   product_type: string;
   operational_status: string;
@@ -85,10 +87,20 @@ export default function AssetDetailPage() {
       const data = await res.json();
       if (data.success) {
         setAsset(data.data);
-        setEditForm({ status: data.data.operational_status, customer: data.data.customer || "", remarks: data.data.remarks || "" });
-        setWarrantyForm({ expiry: data.data.warranty_expiry_date ? data.data.warranty_expiry_date.split("T")[0] : "", notes: data.data.warranty_notes || "" });
-        if (data.data.checked_out_to_user_id) fetchCheckedOutUser(data.data.checked_out_to_user_id);
-        else setCheckedOutUser(null);
+        setEditForm({
+          status: data.data.operational_status || "",
+          customer: data.data.customer || "",
+          remarks: data.data.remarks || ""
+        });
+        setWarrantyForm({
+          expiry: data.data.warranty_expiry_date ? data.data.warranty_expiry_date.split("T")[0] : "",
+          notes: data.data.warranty_notes || ""
+        });
+        if (data.data.checked_out_to_user_id) {
+          fetchCheckedOutUser(data.data.checked_out_to_user_id);
+        } else {
+          setCheckedOutUser(null);
+        }
       }
     } catch (err) { console.error(err); }
     finally { setLoading(false); }
@@ -111,7 +123,7 @@ export default function AssetDetailPage() {
     } catch (err) { console.error(err); }
   };
 
-  const handleAction = async (endpoint: string, method: string = "POST", body?: any) => {
+  const handleAction = async (endpoint: string, method: string, body?: any) => {
     setActionLoading(true);
     try {
       const res = await fetch("/api/assets/" + id + endpoint, {
@@ -126,16 +138,24 @@ export default function AssetDetailPage() {
         setCheckoutModal(false);
         setWarrantyModal(false);
         setCheckoutPurpose("");
-      } else { alert(data.message || "Action failed"); }
-    } catch { alert("Something went wrong"); }
-    finally { setActionLoading(false); }
+      } else {
+        alert(data.message || "Action failed");
+      }
+    } catch {
+      alert("Something went wrong");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const fetchHistory = async () => {
     try {
       const res = await fetch("/api/assets/" + id + "/history");
       const data = await res.json();
-      if (data.success) { setHistory(data.data); setHistoryModal(true); }
+      if (data.success) {
+        setHistory(data.data);
+        setHistoryModal(true);
+      }
     } catch (err) { console.error(err); }
   };
 
@@ -146,12 +166,18 @@ export default function AssetDetailPage() {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch("/api/assets/" + id + "/images", { method: "POST", body: formData });
+      const res = await fetch("/api/assets/" + id + "/images", {
+        method: "POST",
+        body: formData,
+      });
       const data = await res.json();
       if (data.success) setRefreshKey(prev => prev + 1);
       else alert(data.message || "Upload failed");
-    } catch { alert("Upload failed"); }
-    finally { setUploadingImage(false); }
+    } catch {
+      alert("Upload failed");
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleImageDelete = async (url: string) => {
@@ -178,6 +204,7 @@ export default function AssetDetailPage() {
 
   return (
     <div className="space-y-6 pb-12">
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
@@ -186,26 +213,34 @@ export default function AssetDetailPage() {
           <div>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-2xl font-semibold">{asset.product_name}</h1>
-              <Badge variant="outline" className="font-mono text-[10px]">{asset.erp_part_number}</Badge>
-              <Badge variant="outline" className="text-[10px]">{asset.product_type === "main_product" ? "Main Product" : "Accessory"}</Badge>
+              <Badge variant="outline" className="font-mono text-xs">{asset.erp_part_number}</Badge>
+              <Badge variant="outline" className="text-xs">
+                {asset.product_type === "main_product" ? "Main Product" : "Accessory"}
+              </Badge>
             </div>
             <p className="text-sm text-muted-foreground mt-1 font-mono">Serial: {asset.serial_number}</p>
+            {asset.pcb_version && <p className="text-sm text-muted-foreground font-mono">PCB Version: {asset.pcb_version}</p>}
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={fetchHistory}><History size={14} className="mr-2" />History</Button>
-          <Button size="sm" className="bg-[#4169e1] hover:bg-[#3358cc] text-white" onClick={() => setEditModal(true)}><Edit2 size={14} className="mr-2" />Edit</Button>
+          <Button variant="outline" size="sm" onClick={fetchHistory}>
+            <History size={14} className="mr-2" />History
+          </Button>
+          <Button size="sm" className="bg-[#4169e1] hover:bg-[#3358cc] text-white" onClick={() => setEditModal(true)}>
+            <Edit2 size={14} className="mr-2" />Edit
+          </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
         <div className="lg:col-span-2 space-y-6">
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
               <CardContent className="p-5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className={"w-12 h-12 rounded-xl flex items-center justify-center " + (asset.operational_status === "Working" ? "bg-green-50" : asset.operational_status === "Repair" ? "bg-amber-50" : "bg-red-50")}>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${asset.operational_status === "Working" ? "bg-green-50" : asset.operational_status === "Repair" ? "bg-amber-50" : "bg-red-50"}`}>
                     <Package size={20} className={asset.operational_status === "Working" ? "text-green-600" : asset.operational_status === "Repair" ? "text-amber-600" : "text-red-600"} />
                   </div>
                   <div>
@@ -213,58 +248,153 @@ export default function AssetDetailPage() {
                     <p className="text-lg font-semibold">{asset.operational_status}</p>
                   </div>
                 </div>
-                <Badge className={asset.operational_status === "Working" ? "bg-green-100 text-green-700" : asset.operational_status === "Repair" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}>{asset.operational_status}</Badge>
+                <Badge className={asset.operational_status === "Working" ? "bg-green-100 text-green-700" : asset.operational_status === "Repair" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}>
+                  {asset.operational_status}
+                </Badge>
               </CardContent>
             </Card>
+
             <div className="space-y-3">
-              {asset.service_due && <div className="bg-red-50 border border-red-100 p-4 rounded-xl flex gap-3 text-red-700 items-start"><AlertTriangle size={18} className="shrink-0 mt-0.5" /><div><p className="font-semibold text-sm">Service Overdue</p><p className="text-xs opacity-80">Please schedule maintenance.</p></div></div>}
-              {asset.firmware_update_available && <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl flex gap-3 text-blue-700 items-start"><Info size={18} className="shrink-0 mt-0.5" /><div><p className="font-semibold text-sm">Firmware Update Available</p><p className="text-xs opacity-80">A new version is ready.</p></div></div>}
-              {!asset.service_due && !asset.firmware_update_available && <div className="bg-green-50 border border-green-100 p-4 rounded-xl flex gap-3 text-green-700 items-center"><CheckCircle2 size={18} className="shrink-0" /><p className="font-semibold text-sm">All Systems Healthy</p></div>}
+              {asset.service_due && (
+                <div className="bg-red-50 border border-red-100 p-4 rounded-xl flex gap-3 text-red-700 items-start">
+                  <AlertTriangle size={18} className="shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-sm">Service Overdue</p>
+                    <p className="text-xs opacity-80">Please schedule maintenance.</p>
+                  </div>
+                </div>
+              )}
+              {asset.firmware_update_available && (
+                <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl flex gap-3 text-blue-700 items-start">
+                  <Info size={18} className="shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-sm">Firmware Update Available</p>
+                    <p className="text-xs opacity-80">A new version is ready.</p>
+                  </div>
+                </div>
+              )}
+              {!asset.service_due && !asset.firmware_update_available && (
+                <div className="bg-green-50 border border-green-100 p-4 rounded-xl flex gap-3 text-green-700 items-center">
+                  <CheckCircle2 size={18} className="shrink-0" />
+                  <p className="font-semibold text-sm">All Systems Healthy</p>
+                </div>
+              )}
             </div>
           </div>
 
           <Card>
-            <CardHeader className="pb-3 border-b"><CardTitle className="text-base flex items-center gap-2"><MapPin size={16} className="text-[#4169e1]" />Location & Ownership</CardTitle></CardHeader>
+            <CardHeader className="pb-3 border-b">
+              <CardTitle className="text-base flex items-center gap-2">
+                <MapPin size={16} className="text-[#4169e1]" />Location and Ownership
+              </CardTitle>
+            </CardHeader>
             <CardContent className="pt-6">
               <div className="grid grid-cols-2 gap-6">
-                <div><p className="text-xs text-muted-foreground font-medium mb-1">Location</p><p className="font-medium">{asset.current_location_display || "Not set"}</p></div>
-                <div><p className="text-xs text-muted-foreground font-medium mb-1">Customer</p><p className="font-medium">{asset.customer || "Not set"}</p></div>
-                <div><p className="text-xs text-muted-foreground font-medium mb-1">Enrolled By</p><p className="font-medium">{asset.enrolled_by}</p></div>
-                <div><p className="text-xs text-muted-foreground font-medium mb-1">Enrolled At</p><p className="font-medium">{new Date(asset.enrolled_at).toLocaleDateString()}</p></div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium mb-1">Location</p>
+                  <p className="font-medium">{asset.current_location_display || "Not set"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium mb-1">Customer</p>
+                  <p className="font-medium">{asset.customer || "Not set"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium mb-1">Enrolled By</p>
+                  <p className="font-medium">{asset.enrolled_by}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium mb-1">Enrolled At</p>
+                  <p className="font-medium">{new Date(asset.enrolled_at).toLocaleDateString()}</p>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="pb-3 border-b"><CardTitle className="text-base flex items-center gap-2"><Cpu size={16} className="text-[#4169e1]" />Firmware & Service</CardTitle></CardHeader>
+            <CardHeader className="pb-3 border-b">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Cpu size={16} className="text-[#4169e1]" />Firmware and Service
+              </CardTitle>
+            </CardHeader>
             <CardContent className="pt-6 space-y-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div><p className="text-xs text-muted-foreground font-medium mb-1">Firmware</p><p className="font-medium font-mono">{asset.current_firmware || "Unknown"}</p></div>
-                <div className="col-span-2"><p className="text-xs text-muted-foreground font-medium mb-1">Last Updated</p><p className="text-sm font-medium">{asset.last_firmware_update_date ? new Date(asset.last_firmware_update_date).toLocaleDateString() : "Never"}</p>{asset.last_firmware_updated_by && <p className="text-xs text-muted-foreground">By {asset.last_firmware_updated_by}</p>}</div>
-                <div className="flex items-end justify-end">{asset.firmware_update_available && <Button size="sm" variant="outline" className="text-xs h-8 border-[#4169e1] text-[#4169e1] hover:bg-[#4169e1] hover:text-white" onClick={() => handleAction("/firmware-done")} disabled={actionLoading}>Mark Updated</Button>}</div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium mb-1">Firmware</p>
+                  <p className="font-medium font-mono">{asset.current_firmware || "Unknown"}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-xs text-muted-foreground font-medium mb-1">Last Updated</p>
+                  <p className="text-sm font-medium">
+                    {asset.last_firmware_update_date ? new Date(asset.last_firmware_update_date).toLocaleDateString() : "Never"}
+                  </p>
+                  {asset.last_firmware_updated_by && (
+                    <p className="text-xs text-muted-foreground">By {asset.last_firmware_updated_by}</p>
+                  )}
+                </div>
+                <div className="flex items-end justify-end">
+                  {asset.firmware_update_available && (
+                    <Button size="sm" variant="outline"
+                      className="text-xs h-8 border-[#4169e1] text-[#4169e1] hover:bg-[#4169e1] hover:text-white"
+                      onClick={() => { if (confirm("Mark firmware as updated to latest version for this unit?")) { handleAction("/firmware-done", "POST"); } }}
+                      disabled={actionLoading}>
+                      Mark Updated
+                    </Button>
+                  )}
+                </div>
               </div>
               <Separator />
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div><p className="text-xs text-muted-foreground font-medium mb-1">Last Service</p><p className="text-sm font-medium">{asset.last_service_date ? new Date(asset.last_service_date).toLocaleDateString() : "Never"}</p></div>
-                <div><p className="text-xs text-muted-foreground font-medium mb-1">Interval</p><p className="text-sm font-medium">{asset.service_reminder_interval_days} days</p></div>
-                <div><p className="text-xs text-muted-foreground font-medium mb-1">Next Due</p><p className={"text-sm font-semibold " + (asset.service_due ? "text-red-600" : "text-green-600")}>{asset.last_service_date ? new Date(new Date(asset.last_service_date).getTime() + asset.service_reminder_interval_days * 86400000).toLocaleDateString() : "Pending"}</p></div>
-                <div className="flex items-end justify-end"><Button size="sm" variant="outline" className="text-xs h-8 border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white" onClick={() => handleAction("/service-reset")} disabled={actionLoading}>Reset Timer</Button></div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium mb-1">Last Service</p>
+                  <p className="text-sm font-medium">
+                    {asset.last_service_date ? new Date(asset.last_service_date).toLocaleDateString() : "Never"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium mb-1">Interval</p>
+                  <p className="text-sm font-medium">{asset.service_reminder_interval_days} days</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium mb-1">Next Due</p>
+                  <p className={`text-sm font-semibold ${asset.service_due ? "text-red-600" : "text-green-600"}`}>
+                    {asset.last_service_date
+                      ? new Date(new Date(asset.last_service_date).getTime() + asset.service_reminder_interval_days * 86400000).toLocaleDateString()
+                      : "Pending"}
+                  </p>
+                </div>
+                <div className="flex items-end justify-end">
+                  <Button size="sm" variant="outline"
+                    className="text-xs h-8 border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white"
+                    onClick={() => { if (confirm("Reset service date to today for this unit?")) { handleAction("/service-reset", "POST"); } }}
+                    disabled={actionLoading}>
+                    Reset Timer
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader><CardTitle className="text-base">Remarks</CardTitle></CardHeader>
-            <CardContent><p className="text-sm text-foreground/80 leading-relaxed italic">{asset.remarks || "No remarks added."}</p></CardContent>
+            <CardHeader>
+              <CardTitle className="text-base">Remarks</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-foreground/80 leading-relaxed italic">
+                {asset.remarks || "No remarks added."}
+              </p>
+            </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-3 border-b">
-              <CardTitle className="text-base flex items-center gap-2"><ImageIcon size={16} className="text-[#4169e1]" />Images</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2">
+                <ImageIcon size={16} className="text-[#4169e1]" />Images
+              </CardTitle>
               <label className="cursor-pointer">
                 <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploadingImage} />
                 <div className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border rounded-md hover:bg-muted cursor-pointer">
-                  <Upload size={12} />{uploadingImage ? "Uploading..." : "Upload"}
+                  <Upload size={12} />
+                  {uploadingImage ? "Uploading..." : "Upload"}
                 </div>
               </label>
             </CardHeader>
@@ -273,8 +403,12 @@ export default function AssetDetailPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {asset.image_urls.map((url, i) => (
                     <div key={i} className="relative group rounded-lg overflow-hidden border aspect-square">
-                      <img src={url} alt={"Asset image " + (i + 1)} className="w-full h-full object-cover" />
-                      <button onClick={() => handleImageDelete(url)} className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><X size={12} /></button>
+                      <img src={url} alt={`Asset image ${i + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        onClick={() => handleImageDelete(url)}
+                        className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <X size={12} />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -290,10 +424,13 @@ export default function AssetDetailPage() {
         </div>
 
         <div className="space-y-6">
+
           <Card className={isCheckedOut ? "bg-[#1a1f36] text-white border-0" : ""}>
             <CardHeader>
-              <CardTitle className={"text-base flex items-center gap-2 " + (isCheckedOut ? "text-white" : "")}>
-                {isCheckedOut ? <LogOut size={16} className="text-amber-400" /> : <LogIn size={16} className="text-green-600" />}
+              <CardTitle className={`text-base flex items-center gap-2 ${isCheckedOut ? "text-white" : ""}`}>
+                {isCheckedOut
+                  ? <LogOut size={16} className="text-amber-400" />
+                  : <LogIn size={16} className="text-green-600" />}
                 {isCheckedOut ? "Checked Out" : "Available"}
               </CardTitle>
             </CardHeader>
@@ -315,11 +452,24 @@ export default function AssetDetailPage() {
                     </div>
                     <div>
                       <p className="text-xs opacity-60 font-medium mb-1">Since</p>
-                      <p className="text-sm font-medium flex items-center gap-2"><Clock size={12} />{asset.checked_out_at ? new Date(asset.checked_out_at).toLocaleString() : "Unknown"}</p>
+                      <p className="text-sm font-medium flex items-center gap-2">
+                        <Clock size={12} />
+                        {asset.checked_out_at ? new Date(asset.checked_out_at).toLocaleString() : "Unknown"}
+                      </p>
                     </div>
-                    {asset.checked_out_purpose && <div><p className="text-xs opacity-60 font-medium mb-1">Purpose</p><p className="text-sm italic opacity-80">{asset.checked_out_purpose}</p></div>}
+                    {asset.checked_out_purpose && (
+                      <div>
+                        <p className="text-xs opacity-60 font-medium mb-1">Purpose</p>
+                        <p className="text-sm italic opacity-80">{asset.checked_out_purpose}</p>
+                      </div>
+                    )}
                   </div>
-                  <Button className="w-full bg-white text-[#1a1f36] hover:bg-white/90 font-semibold" onClick={() => handleAction("/checkin")} disabled={actionLoading}><LogIn size={16} className="mr-2" />Check In</Button>
+                  <Button
+                    className="w-full bg-white text-[#1a1f36] hover:bg-white/90 font-semibold"
+                    onClick={() => handleAction("/checkin", "POST")}
+                    disabled={actionLoading}>
+                    <LogIn size={16} className="mr-2" />Check In
+                  </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -327,7 +477,11 @@ export default function AssetDetailPage() {
                     <CheckCircle2 size={18} className="text-green-600 shrink-0" />
                     <p className="text-sm text-green-700 font-medium">Available in inventory</p>
                   </div>
-                  <Button className="w-full bg-[#4169e1] hover:bg-[#3358cc] text-white" onClick={() => setCheckoutModal(true)}><LogOut size={16} className="mr-2" />Check Out</Button>
+                  <Button
+                    className="w-full bg-[#4169e1] hover:bg-[#3358cc] text-white"
+                    onClick={() => setCheckoutModal(true)}>
+                    <LogOut size={16} className="mr-2" />Check Out
+                  </Button>
                 </div>
               )}
             </CardContent>
@@ -335,30 +489,45 @@ export default function AssetDetailPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-base flex items-center gap-2"><ShieldCheck size={16} className="text-[#4169e1]" />Warranty</CardTitle>
-              <button onClick={() => setWarrantyModal(true)} className="p-1 rounded hover:bg-muted transition-colors"><Edit2 size={14} className="text-muted-foreground" /></button>
+              <CardTitle className="text-base flex items-center gap-2">
+                <ShieldCheck size={16} className="text-[#4169e1]" />Warranty
+              </CardTitle>
+              <button onClick={() => setWarrantyModal(true)} className="p-1 rounded hover:bg-muted transition-colors">
+                <Edit2 size={14} className="text-muted-foreground" />
+              </button>
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
                 <p className="text-xs text-muted-foreground font-medium mb-1">Expiry Date</p>
-                <p className={"text-sm font-semibold flex items-center gap-2 " + (asset.warranty_expiry_date && new Date(asset.warranty_expiry_date) < new Date() ? "text-red-600" : "text-foreground")}>
-                  <Calendar size={12} />{asset.warranty_expiry_date ? new Date(asset.warranty_expiry_date).toLocaleDateString() : "Not set"}
+                <p className={`text-sm font-semibold flex items-center gap-2 ${asset.warranty_expiry_date && new Date(asset.warranty_expiry_date) < new Date() ? "text-red-600" : "text-foreground"}`}>
+                  <Calendar size={12} />
+                  {asset.warranty_expiry_date ? new Date(asset.warranty_expiry_date).toLocaleDateString() : "Not set"}
                 </p>
               </div>
-              <div><p className="text-xs text-muted-foreground font-medium mb-1">Notes</p><p className="text-xs italic text-muted-foreground">{asset.warranty_notes || "No warranty notes."}</p></div>
-              <button onClick={() => setWarrantyModal(true)} className="w-full text-xs text-[#4169e1] border border-[#4169e1] rounded-md py-2 hover:bg-[#4169e1] hover:text-white transition-colors">Update Warranty</button>
+              <div>
+                <p className="text-xs text-muted-foreground font-medium mb-1">Notes</p>
+                <p className="text-xs italic text-muted-foreground">{asset.warranty_notes || "No warranty notes."}</p>
+              </div>
+              <button
+                onClick={() => setWarrantyModal(true)}
+                className="w-full text-xs text-[#4169e1] border border-[#4169e1] rounded-md py-2 hover:bg-[#4169e1] hover:text-white transition-colors">
+                Update Warranty
+              </button>
             </CardContent>
           </Card>
+
         </div>
       </div>
 
       <Dialog open={editModal} onOpenChange={setEditModal}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader><DialogTitle>Edit Asset</DialogTitle></DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
               <Label>Operational Status</Label>
-              <Select value={editForm.status} onValueChange={(val) => setEditForm(prev => ({ ...prev, status: val }))}>
+              <Select
+                value={editForm.status}
+                onValueChange={(val) => setEditForm(prev => ({ ...prev, status: val || "" }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Working">Working</SelectItem>
@@ -367,25 +536,61 @@ export default function AssetDetailPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2"><Label>Customer</Label><Input value={editForm.customer} onChange={(e) => setEditForm(prev => ({ ...prev, customer: e.target.value }))} placeholder="Customer name" /></div>
-            <div className="space-y-2"><Label>Remarks</Label><Textarea value={editForm.remarks} onChange={(e) => setEditForm(prev => ({ ...prev, remarks: e.target.value }))} placeholder="Additional notes..." className="h-24 resize-none" /></div>
+            <div className="space-y-2">
+              <Label>Customer</Label>
+              <Input
+                value={editForm.customer}
+                onChange={(e) => setEditForm(prev => ({ ...prev, customer: e.target.value }))}
+                placeholder="Customer name" />
+            </div>
+            <div className="space-y-2">
+              <Label>Remarks</Label>
+              <Textarea
+                value={editForm.remarks}
+                onChange={(e) => setEditForm(prev => ({ ...prev, remarks: e.target.value }))}
+                placeholder="Additional notes..."
+                className="h-24 resize-none" />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditModal(false)}>Cancel</Button>
-            <Button className="bg-[#4169e1] hover:bg-[#3358cc] text-white" disabled={actionLoading} onClick={() => handleAction("", "PATCH", { operational_status: editForm.status, customer: editForm.customer, remarks: editForm.remarks })}>Save Changes</Button>
+            <Button
+              className="bg-[#4169e1] hover:bg-[#3358cc] text-white"
+              disabled={actionLoading}
+              onClick={() => handleAction("", "PATCH", {
+                operational_status: editForm.status,
+                customer: editForm.customer,
+                remarks: editForm.remarks
+              })}>
+              Save Changes
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={checkoutModal} onOpenChange={setCheckoutModal}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Check Out Asset</DialogTitle><DialogDescription>This asset will be assigned to you.</DialogDescription></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Check Out Asset</DialogTitle>
+            <DialogDescription>This asset will be assigned to you.</DialogDescription>
+          </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2"><Label>Purpose</Label><Textarea value={checkoutPurpose} onChange={(e) => setCheckoutPurpose(e.target.value)} placeholder="e.g., On-site deployment, Lab testing..." /></div>
+            <div className="space-y-2">
+              <Label>Purpose</Label>
+              <Textarea
+                value={checkoutPurpose}
+                onChange={(e) => setCheckoutPurpose(e.target.value)}
+                placeholder="e.g., On-site deployment, Lab testing..." />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCheckoutModal(false)}>Cancel</Button>
-            <Button className="bg-[#4169e1] hover:bg-[#3358cc] text-white" onClick={() => handleAction("/checkout", "POST", { purpose: checkoutPurpose })} disabled={actionLoading || !checkoutPurpose.trim()}>Check Out</Button>
+            <Button
+              className="bg-[#4169e1] hover:bg-[#3358cc] text-white"
+              onClick={() => handleAction("/checkout", "POST", { purpose: checkoutPurpose })}
+              disabled={actionLoading || !checkoutPurpose.trim()}>
+              Check Out
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -394,19 +599,42 @@ export default function AssetDetailPage() {
         <DialogContent>
           <DialogHeader><DialogTitle>Update Warranty</DialogTitle></DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2"><Label>Expiry Date</Label><Input type="date" value={warrantyForm.expiry} onChange={(e) => setWarrantyForm(prev => ({ ...prev, expiry: e.target.value }))} /></div>
-            <div className="space-y-2"><Label>Notes</Label><Textarea value={warrantyForm.notes} onChange={(e) => setWarrantyForm(prev => ({ ...prev, notes: e.target.value }))} /></div>
+            <div className="space-y-2">
+              <Label>Expiry Date</Label>
+              <Input
+                type="date"
+                value={warrantyForm.expiry}
+                onChange={(e) => setWarrantyForm(prev => ({ ...prev, expiry: e.target.value }))} />
+            </div>
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea
+                value={warrantyForm.notes}
+                onChange={(e) => setWarrantyForm(prev => ({ ...prev, notes: e.target.value }))} />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setWarrantyModal(false)}>Cancel</Button>
-            <Button className="bg-[#4169e1] hover:bg-[#3358cc] text-white" disabled={actionLoading} onClick={() => handleAction("/warranty", "PATCH", { warranty_expiry_date: warrantyForm.expiry, warranty_notes: warrantyForm.notes })}>Update</Button>
+            <Button
+              className="bg-[#4169e1] hover:bg-[#3358cc] text-white"
+              disabled={actionLoading}
+              onClick={() => handleAction("/warranty", "PATCH", {
+                warranty_expiry_date: warrantyForm.expiry,
+                warranty_notes: warrantyForm.notes
+              })}>
+              Update
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={historyModal} onOpenChange={setHistoryModal}>
         <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
-          <DialogHeader><DialogTitle className="flex items-center gap-2"><History size={18} className="text-[#4169e1]" />Audit History</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History size={18} className="text-[#4169e1]" />Audit History
+            </DialogTitle>
+          </DialogHeader>
           <div className="flex-1 overflow-y-auto pr-2">
             <div className="space-y-4 py-4">
               {history.length === 0 ? (
@@ -417,8 +645,8 @@ export default function AssetDetailPage() {
                     <div className="absolute left-[-5px] top-1 w-[10px] h-[10px] rounded-full bg-[#4169e1]" />
                     <div className="bg-muted/30 p-3 rounded-lg border">
                       <div className="flex items-center justify-between mb-2">
-                        <Badge variant="secondary" className="text-[10px] font-semibold">{log.action_type}</Badge>
-                        <span className="text-[10px] text-muted-foreground">{new Date(log.performed_at).toLocaleString()}</span>
+                        <Badge variant="secondary" className="text-xs font-semibold">{log.action_type}</Badge>
+                        <span className="text-xs text-muted-foreground">{new Date(log.performed_at).toLocaleString()}</span>
                       </div>
                       <p className="text-sm font-medium">By: {log.performed_by?.name || "System"}</p>
                       {log.notes && <p className="text-xs text-muted-foreground italic mt-1">"{log.notes}"</p>}
@@ -433,6 +661,7 @@ export default function AssetDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }

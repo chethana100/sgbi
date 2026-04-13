@@ -7,14 +7,13 @@ async function getSession() {
   return await auth.api.getSession({ headers: await headers() });
 }
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
-    const asset = await prisma.asset.findFirst({
-      where: { asset_id: params.id, is_deleted: false },
-    });
+    const asset = await prisma.asset.findFirst({ where: { asset_id: id, is_deleted: false } });
     if (!asset) return NextResponse.json({ success: false, message: "Asset not found" }, { status: 404 });
 
     const fw = await prisma.firmwareMaster.findUnique({ where: { product_id: asset.product_id } });
@@ -23,26 +22,22 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
     const daysSinceService = asset.last_service_date
       ? Math.floor((today.getTime() - asset.last_service_date.getTime()) / (1000 * 60 * 60 * 24))
       : null;
-    const service_due = daysSinceService !== null
-      ? daysSinceService > asset.service_reminder_interval_days
-      : false;
+    const service_due = daysSinceService !== null ? daysSinceService > asset.service_reminder_interval_days : false;
 
-    return NextResponse.json({
-      success: true,
-      data: { ...asset, firmware_update_available, service_due },
-    });
+    return NextResponse.json({ success: true, data: { ...asset, firmware_update_available, service_due } });
   } catch (error) {
     console.error("GET /api/assets/:id error:", error);
     return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500 });
   }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await getSession();
     if (!session) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
-    const asset = await prisma.asset.findFirst({ where: { asset_id: params.id, is_deleted: false } });
+    const asset = await prisma.asset.findFirst({ where: { asset_id: id, is_deleted: false } });
     if (!asset) return NextResponse.json({ success: false, message: "Asset not found" }, { status: 404 });
 
     const body = await req.json();
@@ -60,21 +55,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     updateData.last_modified_by = session.user.name;
 
-    const updated = await prisma.asset.update({ where: { asset_id: params.id }, data: updateData });
+    const updated = await prisma.asset.update({ where: { asset_id: id }, data: updateData });
 
     let action_type: any = "ASSET_STATUS_CHANGED";
     if (body.current_location_id) action_type = "ASSET_LOCATION_CHANGED";
     if (body.remarks) action_type = "ASSET_REMARKS_UPDATED";
 
     await prisma.auditLog.create({
-      data: {
-        asset_id: params.id,
-        performed_by_user_id: session.user.id,
-        action_type,
-        previous_value: asset as any,
-        new_value: updated as any,
-        client_app_version: req.headers.get("x-app-version") || "web",
-      },
+      data: { asset_id: id, performed_by_user_id: session.user.id, action_type, previous_value: asset as any, new_value: updated as any, client_app_version: req.headers.get("x-app-version") || "web" },
     });
 
     return NextResponse.json({ success: true, data: updated });
@@ -84,28 +72,20 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getSession();
+    const { id } = await params;
+    const session = await getSession() as any;
     if (!session) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    if (session.user.role !== "admin") return NextResponse.json({ success: false, message: "Admin only" }, { status: 403 });
 
-    if (session.user.role !== "admin") {
-      return NextResponse.json({ success: false, message: "Admin only" }, { status: 403 });
-    }
-
-    const asset = await prisma.asset.findFirst({ where: { asset_id: params.id, is_deleted: false } });
+    const asset = await prisma.asset.findFirst({ where: { asset_id: id, is_deleted: false } });
     if (!asset) return NextResponse.json({ success: false, message: "Asset not found" }, { status: 404 });
 
-    await prisma.asset.update({ where: { asset_id: params.id }, data: { is_deleted: true } });
+    await prisma.asset.update({ where: { asset_id: id }, data: { is_deleted: true } });
 
     await prisma.auditLog.create({
-      data: {
-        asset_id: params.id,
-        performed_by_user_id: session.user.id,
-        action_type: "ASSET_STATUS_CHANGED",
-        previous_value: asset as any,
-        client_app_version: req.headers.get("x-app-version") || "web",
-      },
+      data: { asset_id: id, performed_by_user_id: session.user.id, action_type: "ASSET_STATUS_CHANGED", previous_value: asset as any, client_app_version: req.headers.get("x-app-version") || "web" },
     });
 
     return NextResponse.json({ success: true, message: "Asset deleted" });

@@ -1,6 +1,8 @@
 "use client";
+import { LocationProvider } from "@/lib/location-context";
 
 import { useSession, signOut } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 import { 
   LayoutDashboard, 
   Package, 
@@ -17,6 +19,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { useLocation } from "@/lib/location-context";
+import { MapPin, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -28,6 +32,59 @@ const navItems = [
   { name: "Admin", href: "/admin", icon: Shield, adminOnly: true },
 ];
 
+function LocationPicker() {
+  const { selectedLocationId, selectedLocationName, setLocation } = useLocation();
+  const [locations, setLocations] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/locations")
+      .then(r => r.json())
+      .then(d => { if (d.success) setLocations(d.data); });
+  }, []);
+
+  const flattenLocations = (locs: any[], depth = 0): any[] => {
+    return locs.flatMap(loc => [
+      { ...loc, depth },
+      ...flattenLocations(loc.children || [], depth + 1)
+    ]);
+  };
+
+  const flat = flattenLocations(locations);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg hover:bg-muted transition-colors"
+      >
+        <MapPin size={14} className="text-[#4169e1]" />
+        <span className="max-w-[120px] truncate">{selectedLocationName}</span>
+        <ChevronDown size={14} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-10 w-56 bg-white dark:bg-zinc-900 border rounded-lg shadow-lg z-50 py-1 max-h-64 overflow-y-auto">
+          <button
+            onClick={() => { setLocation(null, "Global"); setOpen(false); }}
+          >
+            🌍 Global (All locations)
+          </button>
+          {flat.map(loc => (
+            <button
+              key={loc.location_id}
+              onClick={() => { setLocation(loc.location_id, loc.name); setOpen(false); }}
+              className={"w-full text-left px-3 py-2 text-sm hover:bg-muted " + (selectedLocationId === loc.location_id ? "text-[#4169e1] font-medium" : "")}
+              style={{ paddingLeft: (loc.depth * 12 + 12) + "px" }}
+            >
+              {loc.depth > 0 ? "└ " : ""}{loc.name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function DashboardLayout({
   children,
 }: {
@@ -37,6 +94,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
@@ -59,6 +117,7 @@ export default function DashboardLayout({
   const userInitials = session.user.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase() || "US";
 
   return (
+    <LocationProvider>
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
       <aside 
@@ -166,11 +225,12 @@ export default function DashboardLayout({
           </div>
           
           <div className="flex items-center space-y-0 space-x-4">
-            <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground rounded-full">
+            <LocationPicker />
+            <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground rounded-full" onClick={() => router.push("/alerts")}>
               <Bell className="w-5 h-5" />
               <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-zinc-900" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground rounded-full">
+            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground rounded-full" onClick={() => router.push("/profile")}>
               <Settings className="w-5 h-5" />
             </Button>
           </div>
@@ -192,5 +252,6 @@ export default function DashboardLayout({
         />
       )}
     </div>
+    </LocationProvider>
   );
 }

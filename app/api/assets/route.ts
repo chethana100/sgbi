@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
         if (!session) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
         const body = await req.json();
-        const { product_id, serial_number, current_location_id, customer, current_firmware, operational_status, remarks } = body;
+        const { product_id, serial_number, pcb_version, current_location_id, customer, current_firmware, operational_status, remarks } = body;
 
         if (!product_id || !serial_number) {
             return NextResponse.json({ success: false, message: "product_id and serial_number are required" }, { status: 400 });
@@ -120,6 +120,7 @@ export async function POST(req: NextRequest) {
                 product_type: product.product_type,
                 erp_part_number: product.erp_part_number,
                 serial_number,
+                pcb_version: pcb_version || null,
                 current_location_id: current_location_id || null,
                 current_location_display,
                 customer: customer || null,

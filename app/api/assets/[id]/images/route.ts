@@ -4,39 +4,58 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
-    const asset = await prisma.asset.findFirst({ where: { asset_id: params.id, is_deleted: false } });
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    console.log("SUPABASE URL:", supabaseUrl);
+    console.log("SERVICE KEY EXISTS:", !!supabaseKey);
+
+    if (!supabaseUrl || !supabaseKey) {
+      return NextResponse.json({ success: false, message: "Supabase not configured" }, { status: 500 });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const asset = await prisma.asset.findFirst({ where: { asset_id: id, is_deleted: false } });
     if (!asset) return NextResponse.json({ success: false, message: "Asset not found" }, { status: 404 });
 
     const formData = await req.formData();
-    const file = formData.get("file") as File;
+    const file = formData.get("file") as File | null;
     if (!file) return NextResponse.json({ success: false, message: "No file provided" }, { status: 400 });
 
-    const fileName = params.id + "/" + Date.now() + "-" + file.name;
-    const buffer = await file.arrayBuffer();
+    const fileName = `${id}/${Date.now()}-${file.name}`;
+    const buffer = Buffer.from(await file.arrayBuffer());
 
-    const { error } = await supabase.storage.from("asset-images").upload(fileName, buffer, { contentType: file.type });
+    const { error } = await supabase.storage
+      .from("asset-images")
+      .upload(fileName, buffer, { contentType: file.type });
+
     if (error) return NextResponse.json({ success: false, message: error.message }, { status: 500 });
 
     const { data: urlData } = supabase.storage.from("asset-images").getPublicUrl(fileName);
     const publicUrl = urlData.publicUrl;
 
     const updated = await prisma.asset.update({
-      where: { asset_id: params.id },
-      data: { image_urls: { push: publicUrl }, last_modified_by: session.user.name },
+      where: { asset_id: id },
+      data: {
+        image_urls: { push: publicUrl },
+        last_modified_by: session.user.name,
+      },
     });
 
     await prisma.auditLog.create({
-      data: { asset_id: params.id, performed_by_user_id: session.user.id, action_type: "ASSET_IMAGE_UPLOADED", new_value: { url: publicUrl } as any },
+      data: {
+        asset_id: id,
+        performed_by_user_id: session.user.id,
+        action_type: "ASSET_IMAGE_UPLOADED",
+        new_value: { url: publicUrl } as any,
+      },
     });
 
     return NextResponse.json({ success: true, data: { url: publicUrl, asset: updated } });
@@ -46,24 +65,42 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
-    const asset = await prisma.asset.findFirst({ where: { asset_id: params.id, is_deleted: false } });
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      return NextResponse.json({ success: false, message: "Supabase not configured" }, { status: 500 });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const asset = await prisma.asset.findFirst({ where: { asset_id: id, is_deleted: false } });
     if (!asset) return NextResponse.json({ success: false, message: "Asset not found" }, { status: 404 });
 
     const { url } = await req.json();
     if (!url) return NextResponse.json({ success: false, message: "URL required" }, { status: 400 });
 
     const updated = await prisma.asset.update({
-      where: { asset_id: params.id },
-      data: { image_urls: asset.image_urls.filter((u) => u !== url), last_modified_by: session.user.name },
+      where: { asset_id: id },
+      data: {
+        image_urls: asset.image_urls.filter((u) => u !== url),
+        last_modified_by: session.user.name,
+      },
     });
 
     await prisma.auditLog.create({
-      data: { asset_id: params.id, performed_by_user_id: session.user.id, action_type: "ASSET_IMAGE_DELETED", previous_value: { url } as any },
+      data: {
+        asset_id: id,
+        performed_by_user_id: session.user.id,
+        action_type: "ASSET_IMAGE_DELETED",
+        previous_value: { url } as any,
+      },
     });
 
     return NextResponse.json({ success: true, data: updated });

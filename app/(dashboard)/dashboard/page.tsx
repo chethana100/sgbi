@@ -1,4 +1,5 @@
 "use client";
+import { useLocation } from "@/lib/location-context";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -30,14 +31,16 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<Stats>({ working: 0, repair: 0, serviceDue: 0, updatesAvailable: 0 });
   const [recentAssets, setRecentAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
+  const { selectedLocationId, selectedLocationName } = useLocation();
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedLocationId]);
 
   const fetchData = async () => {
     try {
-      const res = await fetch("/api/assets?pageSize=100");
+      const url = selectedLocationId ? "/api/assets?pageSize=100&locationId=" + selectedLocationId : "/api/assets?pageSize=100";
+      const res = await fetch(url);
       const data = await res.json();
       if (data.success) {
         const all: Asset[] = data.data;

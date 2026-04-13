@@ -49,6 +49,7 @@ model Asset {
   product_type                   ProductType
   erp_part_number                String
   serial_number                  String
+  pcb_version                     String?
   current_firmware               String?
   last_firmware_update_date      DateTime?
   last_firmware_updated_by       String?

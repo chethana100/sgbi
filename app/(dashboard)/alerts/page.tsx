@@ -1,4 +1,5 @@
 "use client";
+import { useLocation } from "@/lib/location-context";
 
 import { useEffect, useState } from "react";
 import { Bell, Zap, Clock, UserCheck, Package } from "lucide-react";
@@ -19,13 +20,14 @@ interface Alert {
 export default function AlertsPage() {
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const [loading, setLoading] = useState(true);
+  const { selectedLocationId } = useLocation();
 
     useEffect(() => {
-        fetch("/api/alerts")
+        fetch(selectedLocationId ? "/api/alerts?locationId=" + selectedLocationId : "/api/alerts")
             .then((r) => r.json())
             .then((d) => { if (d.success) setAlerts(d.data); })
             .finally(() => setLoading(false));
-    }, []);
+    }, [selectedLocationId]);
 
     const firmware = alerts.filter((a) => a.type === "FIRMWARE_UPDATE");
     const service = alerts.filter((a) => a.type === "SERVICE_DUE");

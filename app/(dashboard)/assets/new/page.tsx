@@ -50,6 +50,7 @@ export default function AddAssetPage() {
   const [form, setForm] = useState({
     product_id: "",
     serial_number: "",
+    pcb_version: "",
     current_location_id: "",
     customer: "",
     current_firmware: "",
@@ -206,6 +207,16 @@ export default function AddAssetPage() {
                   onChange={(e) => setForm(prev => ({ ...prev, serial_number: e.target.value }))}
                   required
                   placeholder="Enter unique hardware serial"
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pcb_version">PCB Version</Label>
+                <Input
+                  id="pcb_version"
+                  value={form.pcb_version}
+                  onChange={(e) => setForm(prev => ({ ...prev, pcb_version: e.target.value }))}
+                  placeholder="Enter PCB number (optional)"
                   className="h-10"
                 />
               </div>
