@@ -1,11 +1,14 @@
 "use client";
+import * as XLSX from "xlsx";
+import { useLocation } from "@/lib/location-context";
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { 
   Package, 
   Search, 
-  Plus, 
+  Plus,
+  Download,
   ExternalLink,
 } from "lucide-react";
 import { 
@@ -32,10 +35,18 @@ interface Asset {
   customer: string;
   firmware_update_available: boolean;
   service_due: boolean;
+  pcb_version: string | null;
+  current_firmware: string | null;
+  enrolled_by: string;
+  enrolled_at: string;
+  erp_part_number: string;
+  product_type: string;
+  remarks: string | null;
 }
 
 function AssetsContent() {
   const searchParams = useSearchParams();
+  const { selectedLocationId } = useLocation();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,12 +54,40 @@ function AssetsContent() {
   
   useEffect(() => {
     fetchAssets();
-  }, [statusFilter, searchQuery]);
+  }, [statusFilter, searchQuery, selectedLocationId]);
 
-  const fetchAssets = async () => {
+  const downloadCSV = () => {
+    const rows = assets.map(a => ({
+      "Serial Number": a.serial_number,
+      "Product Name": a.product_name,
+      "Product Type": a.product_type,
+      "ERP Part Number": a.erp_part_number,
+      "PCB Version": a.pcb_version || "",
+      "Firmware": a.current_firmware || "",
+      "Location": a.current_location_display || "",
+      "Customer": a.customer || "",
+      "Status": a.operational_status,
+      "Service Due": a.service_due ? "Yes" : "No",
+      "Firmware Update": a.firmware_update_available ? "Yes" : "No",
+      "Enrolled By": a.enrolled_by || "",
+      "Enrolled At": a.enrolled_at ? new Date(a.enrolled_at).toLocaleDateString() : "",
+      "Remarks": a.remarks || "",
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws["!cols"] = [{ wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 30 }];
+
+
+
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Assets");
+    XLSX.writeFile(wb, "SGBI-Assets-" + new Date().toISOString().split("T")[0] + ".xlsx");
+  };
+
+    const fetchAssets = async () => {
     setLoading(true);
     try {
-      let url = `/api/assets?pageSize=100`;
+      let url = selectedLocationId ? `/api/assets?pageSize=500&locationId=${selectedLocationId}` : `/api/assets?pageSize=500`;
       if (statusFilter !== "all") url += `&status=${statusFilter}`;
       if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
       
@@ -90,6 +129,10 @@ function AssetsContent() {
             Add Asset
           </Button>
         </Link>
+        <Button variant="outline" onClick={downloadCSV} className="flex items-center gap-2">
+          <Download size={16} />
+          Export Excel
+        </Button>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">

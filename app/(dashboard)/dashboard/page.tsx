@@ -39,7 +39,7 @@ export default function DashboardPage() {
 
   const fetchData = async () => {
     try {
-      const url = selectedLocationId ? "/api/assets?pageSize=100&locationId=" + selectedLocationId : "/api/assets?pageSize=100";
+      const url = selectedLocationId ? "/api/assets?pageSize=500&locationId=" + selectedLocationId : "/api/assets?pageSize=500";
       const res = await fetch(url);
       const data = await res.json();
       if (data.success) {

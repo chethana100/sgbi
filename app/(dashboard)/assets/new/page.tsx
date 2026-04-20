@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { 
   ArrowLeft, 
   Package, 
@@ -45,6 +46,9 @@ export default function AddAssetPage() {
   const [firmware, setFirmware] = useState<FirmwareMaster[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showAddLocation, setShowAddLocation] = useState(false);
+  const [newLocation, setNewLocation] = useState({ name: "", parent_location_id: "" });
+  const [addingLocation, setAddingLocation] = useState(false);
   const [error, setError] = useState("");
 
   const [form, setForm] = useState({
@@ -100,6 +104,30 @@ export default function AddAssetPage() {
       product_id: productId,
       current_firmware: fw ? fw.latest_version : prev.current_firmware
     }));
+  };
+
+
+  const handleAddLocation = async () => {
+    setAddingLocation(true);
+    try {
+      const res = await fetch("/api/locations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newLocation.name, parent_location_id: newLocation.parent_location_id || null }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const lRes = await fetch("/api/locations");
+        const lData = await lRes.json();
+        if (lData.success) setLocations(lData.data);
+        setForm(prev => ({ ...prev, current_location_id: data.data.location_id }));
+        setShowAddLocation(false);
+        setNewLocation({ name: "", parent_location_id: "" });
+      } else {
+        alert(data.message || "Failed to add location");
+      }
+    } catch { alert("Something went wrong"); }
+    finally { setAddingLocation(false); }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -178,7 +206,7 @@ export default function AddAssetPage() {
                   <SelectTrigger id="product" className="h-10">
                     <SelectValue placeholder="Choose a product model" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white dark:bg-zinc-900 border shadow-xl z-[9999]">
                     {products.map(p => (
                       <SelectItem key={p.product_id} value={p.product_id}>
                         {p.product_name}
@@ -238,8 +266,17 @@ export default function AddAssetPage() {
                   <SelectTrigger id="location" className="h-10">
                     <SelectValue placeholder="Where is it now?" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white dark:bg-zinc-900 border shadow-xl z-[9999]">
                     {renderLocationOptions(locations)}
+                    <div className="border-t mt-1 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddLocation(true)}
+                        className="w-full text-left px-2 py-1.5 text-sm text-[#4169e1] hover:bg-blue-50 flex items-center gap-2"
+                      >
+                        + Add New Location
+                      </button>
+                    </div>
                   </SelectContent>
                 </Select>
               </div>
@@ -261,7 +298,7 @@ export default function AddAssetPage() {
                   <SelectTrigger id="status" className="h-10">
                     <SelectValue placeholder="Condition" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white dark:bg-zinc-900 border shadow-xl z-[9999]">
                     <SelectItem value="Working">Working</SelectItem>
                     <SelectItem value="Repair">Repair</SelectItem>
                     <SelectItem value="Scrap">Scrap</SelectItem>
@@ -346,6 +383,50 @@ export default function AddAssetPage() {
           </Button>
         </div>
       </form>
+
+      <Dialog open={showAddLocation} onOpenChange={setShowAddLocation}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader><DialogTitle>Add New Location</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Location Name</label>
+              <input
+                className="w-full h-10 px-3 border rounded-md text-sm"
+                placeholder="e.g. Demo Lab, Warehouse"
+                value={newLocation.name}
+                onChange={(e) => setNewLocation(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Parent Location (optional)</label>
+              <select
+                className="w-full h-10 px-3 border rounded-md text-sm bg-white dark:bg-zinc-900"
+                value={newLocation.parent_location_id}
+                onChange={(e) => setNewLocation(prev => ({ ...prev, parent_location_id: e.target.value }))}
+              >
+                <option value="">None (Root location)</option>
+                {locations.map(loc => (
+                  <React.Fragment key={loc.location_id}>
+                    <option value={loc.location_id}>{loc.name}</option>
+                    {loc.children?.map(child => (
+                      <option key={child.location_id} value={child.location_id}>&nbsp;&nbsp;└ {child.name}</option>
+                    ))}
+                  </React.Fragment>
+                ))}
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <button onClick={() => setShowAddLocation(false)} className="px-4 py-2 text-sm border rounded-md hover:bg-muted">Cancel</button>
+            <button
+              onClick={handleAddLocation}
+              className="px-4 py-2 text-sm bg-[#4169e1] text-white rounded-md hover:bg-[#3358cc] disabled:opacity-50"
+            >
+              {addingLocation ? "Adding..." : "Add Location"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

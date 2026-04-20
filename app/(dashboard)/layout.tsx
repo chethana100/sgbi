@@ -63,7 +63,7 @@ function LocationPicker() {
         <ChevronDown size={14} />
       </button>
       {open && (
-        <div className="absolute right-0 top-10 w-56 bg-white dark:bg-zinc-900 border rounded-lg shadow-lg z-50 py-1 max-h-64 overflow-y-auto">
+        <div className="absolute right-0 top-10 w-56 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg shadow-xl z-[9999] py-1 max-h-64 overflow-y-auto">
           <button
             onClick={() => { setLocation(null, "Global"); setOpen(false); }}
           >

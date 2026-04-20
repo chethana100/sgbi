@@ -77,6 +77,16 @@ export default function AssetDetailPage() {
   const [checkoutPurpose, setCheckoutPurpose] = useState("");
   const [warrantyForm, setWarrantyForm] = useState({ expiry: "", notes: "" });
   const [history, setHistory] = useState<any[]>([]);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({ open: false, title: "", message: "", onConfirm: () => {} });
+
+  const showConfirm = (title: string, message: string, onConfirm: () => void) => {
+    setConfirmDialog({ open: true, title, message, onConfirm });
+  };
 
   useEffect(() => { fetchAsset(); }, [id, refreshKey]);
 
@@ -180,9 +190,10 @@ export default function AssetDetailPage() {
     }
   };
 
-  const handleImageDelete = async (url: string) => {
-    if (!confirm("Remove this image?")) return;
-    await handleAction("/images", "DELETE", { url });
+  const handleImageDelete = (url: string) => {
+    showConfirm("Remove Image", "Are you sure you want to remove this image?", () => {
+      handleAction("/images", "DELETE", { url });
+    });
   };
 
   if (loading && !asset) return (
@@ -335,7 +346,7 @@ export default function AssetDetailPage() {
                   {asset.firmware_update_available && (
                     <Button size="sm" variant="outline"
                       className="text-xs h-8 border-[#4169e1] text-[#4169e1] hover:bg-[#4169e1] hover:text-white"
-                      onClick={() => { if (confirm("Mark firmware as updated to latest version for this unit?")) { handleAction("/firmware-done", "POST"); } }}
+                      onClick={() => showConfirm("Mark Firmware Updated", "Mark firmware as updated to latest version for this unit?", () => handleAction("/firmware-done", "POST"))}
                       disabled={actionLoading}>
                       Mark Updated
                     </Button>
@@ -365,7 +376,7 @@ export default function AssetDetailPage() {
                 <div className="flex items-end justify-end">
                   <Button size="sm" variant="outline"
                     className="text-xs h-8 border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white"
-                    onClick={() => { if (confirm("Reset service date to today for this unit?")) { handleAction("/service-reset", "POST"); } }}
+                    onClick={() => showConfirm("Reset Service Timer", "Reset service date to today for this unit?", () => handleAction("/service-reset", "POST"))}
                     disabled={actionLoading}>
                     Reset Timer
                   </Button>
@@ -662,6 +673,39 @@ export default function AssetDetailPage() {
         </DialogContent>
       </Dialog>
 
+
+      <Dialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+                <AlertTriangle size={16} className="text-amber-600" />
+              </div>
+              {confirmDialog.title}
+            </DialogTitle>
+            <DialogDescription className="pt-1">
+              {confirmDialog.message}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDialog(prev => ({ ...prev, open: false }))}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-[#4169e1] hover:bg-[#3358cc] text-white"
+              onClick={() => {
+                confirmDialog.onConfirm();
+                setConfirmDialog(prev => ({ ...prev, open: false }));
+              }}
+            >
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

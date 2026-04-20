@@ -34,7 +34,19 @@ export async function GET(req: NextRequest) {
         }
         if (status) where.operational_status = status;
         if (productType) where.product_type = productType;
-        if (locationId) where.current_location_id = locationId;
+        if (locationId) {
+          // Get all child location IDs recursively
+          const getAllChildIds = async (parentId: string): Promise<string[]> => {
+            const children = await prisma.location.findMany({
+              where: { parent_location_id: parentId, is_active: true }
+            });
+            const childIds = children.map(c => c.location_id);
+            const grandChildIds = await Promise.all(childIds.map(id => getAllChildIds(id)));
+            return [parentId, ...childIds, ...grandChildIds.flat()];
+          };
+          const allLocationIds = await getAllChildIds(locationId);
+          where.current_location_id = { in: allLocationIds };
+        }
 
         const [assets, totalCount] = await Promise.all([
             prisma.asset.findMany({
