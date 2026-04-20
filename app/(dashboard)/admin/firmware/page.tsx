@@ -159,7 +159,7 @@ export default function AdminFirmwarePage() {
           <h1 className="text-2xl font-semibold">Firmware Management</h1>
           <p className="text-sm text-muted-foreground">Manage master software versions for hardware products</p>
         </div>
-        <Button className="bg-[#4169e1] hover:bg-[#3358cc] text-white" onClick={() => openModal()}>
+        <Button className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white" onClick={() => openModal()}>
           <Plus size={16} className="mr-2" />
           Add / Update Firmware
         </Button>
@@ -319,7 +319,7 @@ export default function AdminFirmwarePage() {
               <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
               <Button 
                 type="submit" 
-                className="bg-[#4169e1] hover:bg-[#3358cc] text-white px-6"
+                className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white px-6"
                 disabled={submitting || !form.product_id}
               >
                 {submitting ? <Loader2 size={16} className="animate-spin" /> : "Publish Release"}

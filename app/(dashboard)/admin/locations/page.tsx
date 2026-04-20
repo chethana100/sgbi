@@ -162,7 +162,7 @@ export default function AdminLocationsPage() {
                 {hasChildren ? (isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />) : <div className="w-1 h-1 rounded-full bg-gray-400" />}
               </button>
               
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${hasChildren ? "bg-[#4169e1]/10 text-[#4169e1]" : "bg-gray-100 text-gray-500"}`}>
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${hasChildren ? "bg-[#29ABE2]/10 text-[#29ABE2]" : "bg-gray-100 text-gray-500"}`}>
                 {hasChildren ? (isExpanded ? <FolderOpen size={16} /> : <Folder size={16} />) : <MapPin size={14} />}
               </div>
               
@@ -211,7 +211,7 @@ export default function AdminLocationsPage() {
           <h1 className="text-2xl font-semibold">Location Hierarchy</h1>
           <p className="text-sm text-muted-foreground">Manage storage zones and audit areas</p>
         </div>
-        <Button className="bg-[#4169e1] hover:bg-[#3358cc] text-white" onClick={() => openModal()}>
+        <Button className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white" onClick={() => openModal()}>
           <Plus size={16} className="mr-2" />
           Add Root Category
         </Button>
@@ -227,7 +227,7 @@ export default function AdminLocationsPage() {
             <div className="p-20 text-center opacity-40">
               <MapPin size={48} className="mx-auto mb-4" />
               <p className="font-semibold">No locations mapped</p>
-              <button onClick={() => openModal()} className="text-sm text-[#4169e1] hover:underline mt-2">Create root location</button>
+              <button onClick={() => openModal()} className="text-sm text-[#29ABE2] hover:underline mt-2">Create root location</button>
             </div>
           ) : (
             <div className="flex flex-col p-2">
@@ -294,7 +294,7 @@ export default function AdminLocationsPage() {
               <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
               <Button 
                 type="submit" 
-                className="bg-[#4169e1] hover:bg-[#3358cc] text-white"
+                className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white"
                 disabled={submitting}
               >
                 {submitting ? <Loader2 size={16} className="animate-spin" /> : editingLoc ? "Update Name" : "Create Location"}

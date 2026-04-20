@@ -121,10 +121,10 @@ function AssetsContent() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold">Assets</h1>
-          <p className="text-sm text-muted-foreground">Monitor and manage hardware inventory</p>
+          <p className="text-sm text-muted-foreground dark:text-gray-400">Monitor and manage hardware inventory</p>
         </div>
         <Link href="/assets/new">
-          <Button className="bg-[#4169e1] hover:bg-[#3358cc] text-white">
+          <Button className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white">
             <Plus size={16} className="mr-2" />
             Add Asset
           </Button>
@@ -136,15 +136,15 @@ function AssetsContent() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="flex bg-muted/50 p-1 rounded-lg border">
+        <div className="flex bg-muted/50 dark:bg-gray-800 p-1 rounded-lg border dark:border-gray-700">
           {["all", "Working", "Repair", "Scrap"].map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
                 statusFilter === s 
-                ? "bg-white shadow-sm text-foreground" 
-                : "text-muted-foreground hover:text-foreground"
+                ? "bg-white dark:bg-gray-700 shadow-sm text-foreground dark:text-white" 
+                : "text-muted-foreground hover:text-foreground dark:text-gray-400 dark:hover:text-white"
               }`}
             >
               {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -208,8 +208,8 @@ function AssetsContent() {
                     >
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-lg bg-[#4169e1]/5 flex items-center justify-center shrink-0 border border-[#4169e1]/10">
-                            <Package size={16} className="text-[#4169e1]" />
+                          <div className="w-9 h-9 rounded-lg bg-[#29ABE2]/5 flex items-center justify-center shrink-0 border border-[#29ABE2]/10">
+                            <Package size={16} className="text-[#29ABE2]" />
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-foreground leading-none">{asset.product_name}</p>

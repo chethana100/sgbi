@@ -39,7 +39,7 @@ function ResetPasswordForm() {
   if (success) {
     return (
       <div className="text-center space-y-6">
-        <div className="w-16 h-16 bg-blue-50 text-[#4169e1] rounded-full flex items-center justify-center mx-auto">
+        <div className="w-16 h-16 bg-blue-50 text-[#29ABE2] rounded-full flex items-center justify-center mx-auto">
           <CheckCircle2 size={32} />
         </div>
         <div>
@@ -92,7 +92,7 @@ function ResetPasswordForm() {
             <p className="text-sm font-medium text-destructive">{error}</p>
           </div>
         )}
-        <Button type="submit" className="w-full h-11 bg-[#4169e1] hover:bg-[#3358cc] text-white font-medium" disabled={isLoading}>
+        <Button type="submit" className="w-full h-11 bg-[#29ABE2] hover:bg-[#1a96cc] text-white font-medium" disabled={isLoading}>
           {isLoading ? (
             <div className="flex items-center gap-2"><Loader2 size={18} className="animate-spin" /><span>Resetting...</span></div>
           ) : "Reset Password"}

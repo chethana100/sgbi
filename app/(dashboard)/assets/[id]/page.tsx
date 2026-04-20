@@ -237,7 +237,7 @@ export default function AssetDetailPage() {
           <Button variant="outline" size="sm" onClick={fetchHistory}>
             <History size={14} className="mr-2" />History
           </Button>
-          <Button size="sm" className="bg-[#4169e1] hover:bg-[#3358cc] text-white" onClick={() => setEditModal(true)}>
+          <Button size="sm" className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white" onClick={() => setEditModal(true)}>
             <Edit2 size={14} className="mr-2" />Edit
           </Button>
         </div>
@@ -296,7 +296,7 @@ export default function AssetDetailPage() {
           <Card>
             <CardHeader className="pb-3 border-b">
               <CardTitle className="text-base flex items-center gap-2">
-                <MapPin size={16} className="text-[#4169e1]" />Location and Ownership
+                <MapPin size={16} className="text-[#29ABE2]" />Location and Ownership
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
@@ -324,7 +324,7 @@ export default function AssetDetailPage() {
           <Card>
             <CardHeader className="pb-3 border-b">
               <CardTitle className="text-base flex items-center gap-2">
-                <Cpu size={16} className="text-[#4169e1]" />Firmware and Service
+                <Cpu size={16} className="text-[#29ABE2]" />Firmware and Service
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6 space-y-6">
@@ -345,7 +345,7 @@ export default function AssetDetailPage() {
                 <div className="flex items-end justify-end">
                   {asset.firmware_update_available && (
                     <Button size="sm" variant="outline"
-                      className="text-xs h-8 border-[#4169e1] text-[#4169e1] hover:bg-[#4169e1] hover:text-white"
+                      className="text-xs h-8 border-[#29ABE2] text-[#29ABE2] hover:bg-[#29ABE2] hover:text-white"
                       onClick={() => showConfirm("Mark Firmware Updated", "Mark firmware as updated to latest version for this unit?", () => handleAction("/firmware-done", "POST"))}
                       disabled={actionLoading}>
                       Mark Updated
@@ -399,7 +399,7 @@ export default function AssetDetailPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-3 border-b">
               <CardTitle className="text-base flex items-center gap-2">
-                <ImageIcon size={16} className="text-[#4169e1]" />Images
+                <ImageIcon size={16} className="text-[#29ABE2]" />Images
               </CardTitle>
               <label className="cursor-pointer">
                 <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploadingImage} />
@@ -452,7 +452,7 @@ export default function AssetDetailPage() {
                     <div>
                       <p className="text-xs opacity-60 font-medium mb-2">Currently held by</p>
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#4169e1] flex items-center justify-center text-white text-sm font-bold shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-[#29ABE2] flex items-center justify-center text-white text-sm font-bold shrink-0">
                           {checkedOutUser?.name?.charAt(0).toUpperCase() || "?"}
                         </div>
                         <div>
@@ -489,7 +489,7 @@ export default function AssetDetailPage() {
                     <p className="text-sm text-green-700 font-medium">Available in inventory</p>
                   </div>
                   <Button
-                    className="w-full bg-[#4169e1] hover:bg-[#3358cc] text-white"
+                    className="w-full bg-[#29ABE2] hover:bg-[#1a96cc] text-white"
                     onClick={() => setCheckoutModal(true)}>
                     <LogOut size={16} className="mr-2" />Check Out
                   </Button>
@@ -501,7 +501,7 @@ export default function AssetDetailPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <ShieldCheck size={16} className="text-[#4169e1]" />Warranty
+                <ShieldCheck size={16} className="text-[#29ABE2]" />Warranty
               </CardTitle>
               <button onClick={() => setWarrantyModal(true)} className="p-1 rounded hover:bg-muted transition-colors">
                 <Edit2 size={14} className="text-muted-foreground" />
@@ -521,7 +521,7 @@ export default function AssetDetailPage() {
               </div>
               <button
                 onClick={() => setWarrantyModal(true)}
-                className="w-full text-xs text-[#4169e1] border border-[#4169e1] rounded-md py-2 hover:bg-[#4169e1] hover:text-white transition-colors">
+                className="w-full text-xs text-[#29ABE2] border border-[#29ABE2] rounded-md py-2 hover:bg-[#29ABE2] hover:text-white transition-colors">
                 Update Warranty
               </button>
             </CardContent>
@@ -566,7 +566,7 @@ export default function AssetDetailPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditModal(false)}>Cancel</Button>
             <Button
-              className="bg-[#4169e1] hover:bg-[#3358cc] text-white"
+              className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white"
               disabled={actionLoading}
               onClick={() => handleAction("", "PATCH", {
                 operational_status: editForm.status,
@@ -597,7 +597,7 @@ export default function AssetDetailPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setCheckoutModal(false)}>Cancel</Button>
             <Button
-              className="bg-[#4169e1] hover:bg-[#3358cc] text-white"
+              className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white"
               onClick={() => handleAction("/checkout", "POST", { purpose: checkoutPurpose })}
               disabled={actionLoading || !checkoutPurpose.trim()}>
               Check Out
@@ -627,7 +627,7 @@ export default function AssetDetailPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setWarrantyModal(false)}>Cancel</Button>
             <Button
-              className="bg-[#4169e1] hover:bg-[#3358cc] text-white"
+              className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white"
               disabled={actionLoading}
               onClick={() => handleAction("/warranty", "PATCH", {
                 warranty_expiry_date: warrantyForm.expiry,
@@ -643,7 +643,7 @@ export default function AssetDetailPage() {
         <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <History size={18} className="text-[#4169e1]" />Audit History
+              <History size={18} className="text-[#29ABE2]" />Audit History
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto pr-2">
@@ -653,7 +653,7 @@ export default function AssetDetailPage() {
               ) : (
                 history.map((log) => (
                   <div key={log.log_id} className="relative pl-6 pb-6 border-l border-gray-100">
-                    <div className="absolute left-[-5px] top-1 w-[10px] h-[10px] rounded-full bg-[#4169e1]" />
+                    <div className="absolute left-[-5px] top-1 w-[10px] h-[10px] rounded-full bg-[#29ABE2]" />
                     <div className="bg-muted/30 p-3 rounded-lg border">
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="secondary" className="text-xs font-semibold">{log.action_type}</Badge>
@@ -695,7 +695,7 @@ export default function AssetDetailPage() {
               Cancel
             </Button>
             <Button
-              className="bg-[#4169e1] hover:bg-[#3358cc] text-white"
+              className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white"
               onClick={() => {
                 confirmDialog.onConfirm();
                 setConfirmDialog(prev => ({ ...prev, open: false }));

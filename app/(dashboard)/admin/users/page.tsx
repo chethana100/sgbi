@@ -144,7 +144,7 @@ export default function AdminUsersPage() {
               onClick={() => setStatusFilter(s)}
               className={`px-4 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-all whitespace-nowrap ${
                 statusFilter === s 
-                ? "bg-white shadow-sm text-[#4169e1]" 
+                ? "bg-white shadow-sm text-[#29ABE2]" 
                 : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -205,7 +205,7 @@ export default function AdminUsersPage() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="h-9 w-9 ring-1 ring-border">
-                          <AvatarFallback className="bg-[#4169e1]/10 text-[#4169e1] text-xs font-bold">
+                          <AvatarFallback className="bg-[#29ABE2]/10 text-[#29ABE2] text-xs font-bold">
                             {user.name.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
@@ -302,7 +302,7 @@ export default function AdminUsersPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setApproveModal({ open: false, userId: null })}>Cancel</Button>
-            <Button className="bg-[#4169e1] hover:bg-[#3358cc] text-white" onClick={() => approveModal.userId && handleAction(approveModal.userId, "approve", { role: selectedRole })}>
+            <Button className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white" onClick={() => approveModal.userId && handleAction(approveModal.userId, "approve", { role: selectedRole })}>
               Approve User
             </Button>
           </DialogFooter>
@@ -332,7 +332,7 @@ export default function AdminUsersPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRoleModal({ open: false, userId: null, currentRole: "" })}>Cancel</Button>
-            <Button className="bg-[#4169e1] hover:bg-[#3358cc] text-white" onClick={() => roleModal.userId && handleAction(roleModal.userId, "role", { role: selectedRole })}>
+            <Button className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white" onClick={() => roleModal.userId && handleAction(roleModal.userId, "role", { role: selectedRole })}>
               Update Role
             </Button>
           </DialogFooter>

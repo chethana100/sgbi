@@ -58,7 +58,7 @@ export default function SignupPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-8">
         <div className="w-full max-w-sm text-center space-y-6">
-          <div className="w-16 h-16 bg-blue-50 text-[#4169e1] rounded-full flex items-center justify-center mx-auto">
+          <div className="w-16 h-16 bg-blue-50 text-[#29ABE2] rounded-full flex items-center justify-center mx-auto">
             <CheckCircle2 size={32} />
           </div>
           <div className="space-y-2">
@@ -90,7 +90,7 @@ export default function SignupPage() {
           <div className="space-y-3 pt-4">
             {["Real-time asset tracking", "Firmware update management", "Full audit history"].map((item) => (
               <div key={item} className="flex items-center gap-3 text-white/70">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#4169e1]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-[#29ABE2]" />
                 <span className="text-sm font-medium">{item}</span>
               </div>
             ))}
@@ -192,7 +192,7 @@ export default function SignupPage() {
 
             <Button
               type="submit"
-              className="w-full h-11 bg-[#4169e1] hover:bg-[#3358cc] text-white font-medium"
+              className="w-full h-11 bg-[#29ABE2] hover:bg-[#1a96cc] text-white font-medium"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -206,7 +206,7 @@ export default function SignupPage() {
 
           <p className="text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/auth/login" className="text-[#4169e1] hover:underline font-semibold">
+            <Link href="/auth/login" className="text-[#29ABE2] hover:underline font-semibold">
               Sign in
             </Link>
           </p>

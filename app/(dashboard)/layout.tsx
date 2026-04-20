@@ -1,29 +1,18 @@
 "use client";
 import { LocationProvider } from "@/lib/location-context";
-
 import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  Package, 
-  Settings, 
-  LogOut, 
-  Bell, 
-  Shield, 
-  Menu,
-  X,
-  Loader2,
-  ChevronRight
+import {
+  LayoutDashboard, Package, LogOut, Bell,
+  Shield, Menu, X, Loader2, ChevronRight,
+  MapPin, ChevronDown, Settings, Moon, Sun
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useLocation } from "@/lib/location-context";
-import { MapPin, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+import { useTheme } from "next-themes";
 
 const navItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -36,47 +25,48 @@ function LocationPicker() {
   const { selectedLocationId, selectedLocationName, setLocation } = useLocation();
   const [locations, setLocations] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
-
   useEffect(() => {
-    fetch("/api/locations")
-      .then(r => r.json())
-      .then(d => { if (d.success) setLocations(d.data); });
+    fetch("/api/locations").then(r => r.json()).then(d => { if (d.success) setLocations(d.data); });
   }, []);
-
-  const flattenLocations = (locs: any[], depth = 0): any[] => {
-    return locs.flatMap(loc => [
-      { ...loc, depth },
-      ...flattenLocations(loc.children || [], depth + 1)
-    ]);
-  };
-
+  const flattenLocations = (locs: any[], depth = 0): any[] =>
+    locs.flatMap(loc => [{ ...loc, depth }, ...flattenLocations(loc.children || [], depth + 1)]);
   const flat = flattenLocations(locations);
-
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest('.loc-picker')) setOpen(false);
+    };
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, []);
   return (
-    <div className="relative">
+    <div className="relative loc-picker">
       <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-3 py-1.5 text-sm border rounded-lg hover:bg-muted transition-colors"
+        onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
+        className="flex items-center gap-2 px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg hover:border-[#29ABE2]/50 hover:bg-sky-50 transition-all shadow-sm"
       >
-        <MapPin size={14} className="text-[#4169e1]" />
-        <span className="max-w-[120px] truncate">{selectedLocationName}</span>
-        <ChevronDown size={14} />
+        <MapPin size={13} className="text-[#29ABE2]" />
+        <span className="max-w-[110px] truncate font-medium text-gray-700">{selectedLocationName}</span>
+        <ChevronDown size={13} className={cn("text-gray-400 transition-transform", open && "rotate-180")} />
       </button>
       {open && (
-        <div className="absolute right-0 top-10 w-56 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg shadow-xl z-[9999] py-1 max-h-64 overflow-y-auto">
+        <div className="absolute right-0 top-10 w-52 bg-white border border-gray-200 rounded-xl shadow-xl z-[9999] py-1.5 max-h-64 overflow-y-auto">
           <button
             onClick={() => { setLocation(null, "Global"); setOpen(false); }}
+            className={cn("w-full text-left px-3 py-2 text-sm flex items-center gap-2 transition-colors hover:bg-gray-50",
+              !selectedLocationId ? "text-[#29ABE2] font-semibold bg-sky-50" : "text-gray-700")}
           >
             🌍 Global (All locations)
           </button>
+          <div className="h-px bg-gray-100 my-1" />
           {flat.map(loc => (
             <button
               key={loc.location_id}
               onClick={() => { setLocation(loc.location_id, loc.name); setOpen(false); }}
-              className={"w-full text-left px-3 py-2 text-sm hover:bg-muted " + (selectedLocationId === loc.location_id ? "text-[#4169e1] font-medium" : "")}
+              className={cn("w-full text-left py-2 text-sm transition-colors hover:bg-gray-50",
+                selectedLocationId === loc.location_id ? "text-[#29ABE2] font-semibold bg-sky-50" : "text-gray-700")}
               style={{ paddingLeft: (loc.depth * 12 + 12) + "px" }}
             >
-              {loc.depth > 0 ? "└ " : ""}{loc.name}
+              {loc.depth > 0 ? "↳ " : ""}{loc.name}
             </button>
           ))}
         </div>
@@ -85,173 +75,116 @@ function LocationPicker() {
   );
 }
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: session, isPending } = useSession();
   const pathname = usePathname();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [mounted, setMounted] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (isPending || !mounted) {
+  const { theme, setTheme } = useTheme();
+  if (isPending) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-6 h-6 animate-spin text-[#29ABE2]" />
+        </div>
       </div>
     );
   }
-
-  // Double check session (though middleware handles most of it)
-  if (!session) {
-    return null; // Let middleware handle redirect
-  }
-
+  if (!session) return null;
   const userRole = (session.user as any).role || "field_user";
-  const userInitials = session.user.name?.split(" ").map((n: string) => n[0]).join("").toUpperCase() || "US";
-
+  const userName = session.user.name || "User";
+  const userInitials = userName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
+  const currentPage = pathname.split("/").filter(Boolean).pop() || "dashboard";
   return (
     <LocationProvider>
-    <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
-      <aside 
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 bg-[#1a1f36] text-white transition-transform duration-300 transform lg:translate-x-0 lg:static lg:inset-0",
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        <div className="flex flex-col h-full">
-          {/* Logo */}
-          <div className="p-6 flex items-center justify-between">
-            <Link href="/dashboard" className="flex items-center space-x-3 group">
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xl font-bold tracking-tight">SGBI <span className="text-primary/80">Tracker</span></span>
-            </Link>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="lg:hidden text-white/60 hover:text-white"
-              onClick={() => setIsSidebarOpen(false)}
-            >
-              <X className="w-6 h-6" />
-            </Button>
+      <div className="min-h-screen bg-[#F7F8FA] dark:bg-gray-950 flex">
+        <aside className={cn(
+          "fixed inset-y-0 left-0 z-50 flex flex-col w-60 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shadow-sm transition-transform duration-300",
+          "lg:static lg:translate-x-0",
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        )}>
+          <div className="flex items-center gap-3 px-5 h-16 border-b border-gray-100 dark:border-gray-800 shrink-0">
+            <div className="w-8 h-8 rounded-xl overflow-hidden shrink-0">
+              <img src="/sgbi-logo.png" alt="SGBI" className="w-full h-full object-contain" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-gray-900 dark:text-white tracking-tight">SGBI Inc.</p>
+              <p className="text-[10px] text-gray-400 tracking-wider uppercase">Asset Tracker</p>
+            </div>
+            <button className="ml-auto lg:hidden text-gray-400 hover:text-gray-600" onClick={() => setIsSidebarOpen(false)}>
+              <X size={18} />
+            </button>
           </div>
-
-          <Separator className="bg-white/10 mx-6 w-auto mb-6" />
-
-          {/* Navigation */}
-          <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
+          <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+            <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-600 uppercase tracking-widest px-3 mb-2">Menu</p>
             {navItems.map((item) => {
               if (item.adminOnly && userRole !== "admin") return null;
-              
-              const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-              
+              const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative",
-                    isActive 
-                      ? "bg-primary text-white shadow-md shadow-primary/20" 
-                      : "text-white/60 hover:text-white hover:bg-white/5"
-                  )}
-                >
-                  <item.icon className={cn("w-5 h-5 mr-3", isActive ? "text-white" : "text-white/40 group-hover:text-white/80")} />
-                  <span className="font-medium">{item.name}</span>
-                  {isActive && (
-                    <div className="absolute right-3 w-1.5 h-1.5 bg-white rounded-full" />
-                  )}
+                <Link key={item.href} href={item.href} onClick={() => setIsSidebarOpen(false)}
+                  className={cn("flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                    isActive ? "bg-[#29ABE2]/10 text-[#29ABE2]" : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
+                  )}>
+                  <item.icon size={17} className={isActive ? "text-[#29ABE2]" : "text-gray-400"} />
+                  {item.name}
+                  {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#29ABE2]" />}
                 </Link>
               );
             })}
           </nav>
-
-          {/* User Profile & Sign Out */}
-          <div className="p-4 mt-auto">
-            <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-              <div className="flex items-center space-x-3 mb-4">
-                <Avatar className="h-10 w-10 border border-white/20">
-                  <AvatarImage src={session.user.image || undefined} />
-                  <AvatarFallback className="bg-primary/20 text-primary-foreground font-bold">{userInitials}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate">{session.user.name}</p>
-                  <p className="text-xs text-white/40 truncate capitalize">{userRole.replace("_", " ")}</p>
-                </div>
+          <div className="p-3 border-t border-gray-100 dark:border-gray-800 shrink-0">
+            <div className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-gray-50 transition-colors">
+              <div className="w-8 h-8 rounded-full bg-[#29ABE2]/15 border border-[#29ABE2]/30 flex items-center justify-center shrink-0">
+                <span className="text-xs font-bold text-[#29ABE2]">{userInitials}</span>
               </div>
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start text-white/60 hover:text-red-400 hover:bg-red-400/10 h-10 rounded-xl"
-                onClick={async () => {
-                  await signOut();
-                  window.location.href = "/auth/login";
-                }}
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-gray-800 truncate">{userName}</p>
+                <p className="text-[10px] text-gray-400 capitalize">{userRole.replace("_", " ")}</p>
+              </div>
+              <button onClick={async () => { await signOut(); window.location.href = "/auth/login"; }}
+                className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors" title="Sign out">
+                <LogOut size={14} />
+              </button>
+            </div>
+          </div>
+        </aside>
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30 shrink-0">
+            <div className="flex items-center gap-3">
+              <button className="lg:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-500" onClick={() => setIsSidebarOpen(true)}>
+                <Menu size={18} />
+              </button>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-gray-400 hidden sm:block text-xs">SGBI</span>
+                <ChevronRight size={12} className="text-gray-300 hidden sm:block" />
+                <span className="font-semibold text-gray-800 dark:text-gray-200 capitalize text-sm">{currentPage}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <LocationPicker />
+              <button onClick={() => router.push("/alerts")} className="relative p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+                <Bell size={17} />
+                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-white" />
+              </button>
+              <button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-500 dark:hover:text-gray-300 dark:hover:bg-gray-800 transition-colors"
               >
-                <LogOut className="w-4 h-4 mr-2" />
-                <span className="text-xs font-semibold">Sign Out</span>
-              </Button>
+                {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+              </button>
+              <button onClick={() => router.push("/profile")} className="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:text-gray-500 dark:hover:text-gray-300 dark:hover:bg-gray-800 transition-colors">
+                <Settings size={17} />
+              </button>
             </div>
-          </div>
+          </header>
+          <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+            <div className="mx-auto max-w-7xl">{children}</div>
+          </main>
         </div>
-      </aside>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top Header */}
-        <header className="h-16 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-6 sticky top-0 z-30">
-          <div className="flex items-center">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="lg:hidden mr-4"
-              onClick={() => setIsSidebarOpen(true)}
-            >
-              <Menu className="w-6 h-6" />
-            </Button>
-            <div className="hidden md:flex items-center text-sm text-muted-foreground font-medium">
-              <span>SGBI</span>
-              <ChevronRight className="w-4 h-4 mx-2" />
-              <span className="text-foreground capitalize">{pathname.split("/").filter(Boolean).pop() || "Dashboard"}</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-y-0 space-x-4">
-            <LocationPicker />
-            <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground rounded-full" onClick={() => router.push("/alerts")}>
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-zinc-900" />
-            </Button>
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground rounded-full" onClick={() => router.push("/profile")}>
-              <Settings className="w-5 h-5" />
-            </Button>
-          </div>
-        </header>
-
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto bg-zinc-50/50 dark:bg-zinc-950/50 p-6">
-          <div className="mx-auto max-w-7xl animate-in fade-in duration-500">
-            {children}
-          </div>
-        </main>
+        {isSidebarOpen && (
+          <div className="fixed inset-0 bg-black/30 z-40 lg:hidden backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)} />
+        )}
       </div>
-
-      {/* Mobile Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-    </div>
     </LocationProvider>
   );
 }

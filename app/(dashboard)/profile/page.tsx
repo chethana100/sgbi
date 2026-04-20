@@ -55,7 +55,7 @@ export default function ProfilePage() {
                         <div className="space-y-6">
                             {/* Avatar */}
                             <div className="flex items-center gap-4">
-                                <div className="w-16 h-16 rounded-full bg-[#4169e1] flex items-center justify-center text-white text-xl font-bold">
+                                <div className="w-16 h-16 rounded-full bg-[#29ABE2] flex items-center justify-center text-white text-xl font-bold">
                                     {user.name?.charAt(0).toUpperCase()}
                                 </div>
                                 <div>

@@ -171,7 +171,7 @@ export default function AddAssetPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-        <Loader2 size={32} className="animate-spin text-[#4169e1]" />
+        <Loader2 size={32} className="animate-spin text-[#29ABE2]" />
         <p className="text-muted-foreground font-medium">Preparing enrollment form...</p>
       </div>
     );
@@ -195,7 +195,7 @@ export default function AddAssetPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Package size={16} className="text-[#4169e1]" />
+                <Package size={16} className="text-[#29ABE2]" />
                 Product Identity
               </CardTitle>
             </CardHeader>
@@ -255,7 +255,7 @@ export default function AddAssetPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <MapPin size={16} className="text-[#4169e1]" />
+                <MapPin size={16} className="text-[#29ABE2]" />
                 Initial Deployment
               </CardTitle>
             </CardHeader>
@@ -272,7 +272,7 @@ export default function AddAssetPage() {
                       <button
                         type="button"
                         onClick={() => setShowAddLocation(true)}
-                        className="w-full text-left px-2 py-1.5 text-sm text-[#4169e1] hover:bg-blue-50 flex items-center gap-2"
+                        className="w-full text-left px-2 py-1.5 text-sm text-[#29ABE2] hover:bg-blue-50 flex items-center gap-2"
                       >
                         + Add New Location
                       </button>
@@ -312,7 +312,7 @@ export default function AddAssetPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <Cpu size={16} className="text-[#4169e1]" />
+                <Cpu size={16} className="text-[#29ABE2]" />
                 Configuration
               </CardTitle>
             </CardHeader>
@@ -328,7 +328,7 @@ export default function AddAssetPage() {
                     className="h-10 flex-1 font-mono"
                   />
                   {selectedProduct && firmware.find(f => f.product_id === selectedProduct.product_id) && (
-                    <Badge variant="outline" className="shrink-0 flex items-center gap-1 border-[#4169e1] text-[#4169e1] bg-[#4169e1]/5">
+                    <Badge variant="outline" className="shrink-0 flex items-center gap-1 border-[#29ABE2] text-[#29ABE2] bg-[#29ABE2]/5">
                       <CheckCircle2 size={10} /> Latest Available
                     </Badge>
                   )}
@@ -341,7 +341,7 @@ export default function AddAssetPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
-                <FileText size={16} className="text-[#4169e1]" />
+                <FileText size={16} className="text-[#29ABE2]" />
                 Notes & Audit
               </CardTitle>
             </CardHeader>
@@ -371,7 +371,7 @@ export default function AddAssetPage() {
           <Button variant="outline" type="button" onClick={() => router.back()} disabled={submitting}>Cancel</Button>
           <Button 
             type="submit" 
-            className="bg-[#4169e1] hover:bg-[#3358cc] text-white px-8 h-10 font-semibold" 
+            className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white px-8 h-10 font-semibold" 
             disabled={submitting}
           >
             {submitting ? (
@@ -420,7 +420,7 @@ export default function AddAssetPage() {
             <button onClick={() => setShowAddLocation(false)} className="px-4 py-2 text-sm border rounded-md hover:bg-muted">Cancel</button>
             <button
               onClick={handleAddLocation}
-              className="px-4 py-2 text-sm bg-[#4169e1] text-white rounded-md hover:bg-[#3358cc] disabled:opacity-50"
+              className="px-4 py-2 text-sm bg-[#29ABE2] text-white rounded-md hover:bg-[#1a96cc] disabled:opacity-50"
             >
               {addingLocation ? "Adding..." : "Add Location"}
             </button>

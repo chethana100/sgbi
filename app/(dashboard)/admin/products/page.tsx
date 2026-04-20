@@ -164,7 +164,7 @@ export default function AdminProductsPage() {
           <h1 className="text-2xl font-semibold">Products Master</h1>
           <p className="text-sm text-muted-foreground">Define hardware models and part numbers</p>
         </div>
-        <Button className="bg-[#4169e1] hover:bg-[#3358cc] text-white" onClick={() => openModal()}>
+        <Button className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white" onClick={() => openModal()}>
           <Plus size={16} className="mr-2" />
           Add Product
         </Button>
@@ -339,7 +339,7 @@ export default function AdminProductsPage() {
               <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
               <Button 
                 type="submit" 
-                className="bg-[#4169e1] hover:bg-[#3358cc] text-white"
+                className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white"
                 disabled={submitting}
               >
                 {submitting ? <Loader2 size={16} className="animate-spin" /> : "Save Product"}
