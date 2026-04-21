@@ -108,7 +108,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <img src="/sgbi-logo.png" alt="SGBI" className="w-full h-full object-contain" />
             </div>
             <div>
-              <p className="text-sm font-bold text-gray-900 dark:text-white tracking-tight">SGBI Inc.</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-white tracking-tight">SGBI</p>
               <p className="text-[10px] text-gray-400 tracking-wider uppercase">Asset Tracker</p>
             </div>
             <button className="ml-auto lg:hidden text-gray-400 hover:text-gray-600" onClick={() => setIsSidebarOpen(false)}>

@@ -1,9 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "@/lib/prisma";
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendEmail } from "@/lib/email";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -34,23 +32,24 @@ export const auth = betterAuth({
       console.log("Sending reset email to:", user.email);
       console.log("Reset URL:", url);
       try {
-        const result = await resend.emails.send({
-          from: "SGBI Asset Tracker <onboarding@resend.dev>",
+        await sendEmail({
           to: user.email,
+          toName: user.name || "User",
           subject: "Reset your SGBI password",
           html: `
-            <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
-              <h2 style="color: #1a1f36;">Reset your password</h2>
-              <p>Hi ${user.name},</p>
-              <p>Click the button below to reset your password:</p>
-              <a href="${url}" style="display:inline-block;background:#4169e1;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin:16px 0;">
-                Reset Password
-              </a>
-              <p style="color:#999;font-size:12px;">This link expires in 30 minutes.</p>
+            <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#f8f9fc;">
+              <div style="background:white;border-radius:16px;padding:32px;border:1px solid #e5e7eb;">
+                <h2 style="color:#111827;margin:0 0 16px;">Reset your password</h2>
+                <p style="color:#6b7280;">Hi ${user.name},</p>
+                <p style="color:#6b7280;">Click below to reset your password. This link expires in 30 minutes.</p>
+                <a href="${url}" style="display:inline-block;background:#29ABE2;color:white;padding:14px 28px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:14px;margin:16px 0;">
+                  Reset Password →
+                </a>
+                <p style="color:#9ca3af;font-size:12px;">If you did not request this, ignore this email.</p>
+              </div>
             </div>
           `,
         });
-        console.log("Email sent:", result);
       } catch (error) {
         console.error("Email error:", error);
       }
