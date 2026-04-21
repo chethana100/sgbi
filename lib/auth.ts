@@ -21,6 +21,7 @@ export const auth = betterAuth({
       },
     },
   },
+  trustedOrigins: ["https://sgbi-xqft.vercel.app", "https://sgbi.vercel.app", "http://localhost:3000"],
   session: {
     expiresIn: 60 * 60 * 8,
     updateAge: 60 * 60,
