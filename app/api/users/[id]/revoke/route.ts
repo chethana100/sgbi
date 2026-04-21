@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
-export async function PATCH(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(_req: NextRequest, { params }: { params: { id: string } }) {
     const { id } = await params;
     try {
         const session = await auth.api.getSession({ headers: await headers() }) as any;
