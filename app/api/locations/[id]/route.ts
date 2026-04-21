@@ -28,24 +28,21 @@ async function updateDescendantPaths(locationId: string) {
     }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
         const session = await getSession();
         if (!session) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         if (session.user.role !== "admin") return NextResponse.json({ success: false, message: "Admin only" }, { status: 403 });
-
         const { name } = await req.json();
         if (!name) return NextResponse.json({ success: false, message: "name is required" }, { status: 400 });
-
         const updated = await prisma.location.update({
-            where: { location_id: params.id },
+            where: { location_id: id },
             data: { name },
         });
-
-        const full_path = await computeFullPath(params.id);
-        await prisma.location.update({ where: { location_id: params.id }, data: { full_path } });
-        await updateDescendantPaths(params.id);
-
+        const full_path = await computeFullPath(id);
+        await prisma.location.update({ where: { location_id: id }, data: { full_path } });
+        await updateDescendantPaths(id);
         await prisma.auditLog.create({
             data: {
                 performed_by_user_id: session.user.id,
@@ -53,7 +50,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
                 new_value: { ...updated, full_path } as any,
             },
         });
-
         return NextResponse.json({ success: true, data: { ...updated, full_path } });
     } catch (error) {
         console.error("PATCH /api/locations/:id error:", error);
@@ -61,28 +57,25 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
+        const { id } = await params;
         const session = await getSession();
         if (!session) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
         if (session.user.role !== "admin") return NextResponse.json({ success: false, message: "Admin only" }, { status: 403 });
-
         const assetsAtLocation = await prisma.asset.count({
-            where: { current_location_id: params.id, is_deleted: false },
+            where: { current_location_id: id, is_deleted: false },
         });
-
         if (assetsAtLocation > 0) {
             return NextResponse.json({
                 success: false,
                 message: `Cannot deactivate — ${assetsAtLocation} asset(s) are assigned to this location. Reassign them first.`,
             }, { status: 409 });
         }
-
         await prisma.location.update({
-            where: { location_id: params.id },
+            where: { location_id: id },
             data: { is_active: false },
         });
-
         return NextResponse.json({ success: true, message: "Location deactivated" });
     } catch (error) {
         console.error("DELETE /api/locations/:id error:", error);
