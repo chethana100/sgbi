@@ -5,6 +5,17 @@ import { sendEmail } from "@/lib/email";
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
+  advanced: {
+    cookiePrefix: "sgbi",
+    cookies: {
+      session_token: {
+        attributes: {
+          secure: true,
+          sameSite: "none",
+        },
+      },
+    },
+  },
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
