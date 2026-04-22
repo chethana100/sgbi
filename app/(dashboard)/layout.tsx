@@ -90,7 +90,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
     );
   }
-  if (!session) return null;
+  if (!session) { router.push("/auth/login"); return null; }
   const userRole = (session.user as any).role || "field_user";
   const userName = session.user.name || "User";
   const userInitials = userName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
