@@ -18,7 +18,7 @@ export default function LoginPage() {
   useEffect(() => {
   }, []);
   const [mounted, setMounted] = useState(false);
-  useState(() => { setMounted(true); });
+  useEffect(() => { setMounted(true); }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,7 +144,7 @@ export default function LoginPage() {
             <p className="text-sm text-gray-400 mt-1">Sign in to your account</p>
           </div>
 
-          <form onSubmit={(e) => { e.preventDefault(); handleSubmit(e); }} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1.5">Email</label>
               <div className="relative">
