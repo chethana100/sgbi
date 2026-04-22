@@ -16,7 +16,6 @@ export default function LoginPage() {
 
   // Clear any stale sessions on login page load
   useEffect(() => {
-    fetch("/api/auth/sign-out", { method: "POST" }).catch(() => {});
   }, []);
   const [mounted, setMounted] = useState(false);
   useState(() => { setMounted(true); });
