@@ -18,6 +18,7 @@ export default function LoginPage() {
   useEffect(() => { setMounted(true); }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log("Form submitted", email, password);
     e.preventDefault();
     setError("");
     setIsLoading(true);
