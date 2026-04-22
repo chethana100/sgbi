@@ -205,3 +205,4 @@ export default function LoginPage() {
     </div>
   );
 }
+export const dynamic = "force-dynamic";
