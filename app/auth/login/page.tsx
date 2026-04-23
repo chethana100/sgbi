@@ -19,7 +19,7 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
-      const res = await signIn.email({
+      const res = await authClient.signIn.email({
         email,
         password,
       });
