@@ -71,7 +71,7 @@ export default function LoginForm() {
           {x:"15%",y:"20%",s:3,d:3},{x:"80%",y:"15%",s:2,d:4},{x:"90%",y:"60%",s:3,d:5},
           {x:"10%",y:"70%",s:2,d:3},{x:"50%",y:"85%",s:3,d:4},{x:"70%",y:"80%",s:2,d:6},
         ].map((dot,i) => (
-          <div key={i} className="absolute rounded-full bg-[#29ABE2]"
+          <div key={i} className="absolute rounded-full bg-[#29ABE2]" suppressHydrationWarning
             style={{ left:dot.x, top:dot.y, width:dot.s, height:dot.s, opacity:0.4,
               animation:`pulse ${dot.d}s ease-in-out infinite`, animationDelay:`${i*0.4}s` }}/>
         ))}

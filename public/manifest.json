@@ -1,0 +1,22 @@
+{
+  "name": "SGBI Asset Tracker",
+  "short_name": "SGBI Assets",
+  "description": "Internal Asset Tracking System",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#050f23",
+  "theme_color": "#29ABE2",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/sgbi-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/sgbi-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
