@@ -67,3 +67,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans, system-ui, sans-serif);
 }
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
