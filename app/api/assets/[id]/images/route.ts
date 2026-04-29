@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
+import sharp from "sharp";
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -12,9 +13,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    console.log("SUPABASE URL:", supabaseUrl);
-    console.log("SERVICE KEY EXISTS:", !!supabaseKey);
 
     if (!supabaseUrl || !supabaseKey) {
       return NextResponse.json({ success: false, message: "Supabase not configured" }, { status: 500 });
@@ -29,12 +27,19 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const file = formData.get("file") as File | null;
     if (!file) return NextResponse.json({ success: false, message: "No file provided" }, { status: 400 });
 
-    const fileName = `${id}/${Date.now()}-${file.name}`;
     const buffer = Buffer.from(await file.arrayBuffer());
+
+    // Auto resize: max 1200px width, convert to webp for smaller size
+    const resizedBuffer = await sharp(buffer)
+      .resize(1200, 1200, { fit: "inside", withoutEnlargement: true })
+      .webp({ quality: 85 })
+      .toBuffer();
+
+    const fileName = `${id}/${Date.now()}.webp`;
 
     const { error } = await supabase.storage
       .from("asset-images")
-      .upload(fileName, buffer, { contentType: file.type });
+      .upload(fileName, resizedBuffer, { contentType: "image/webp" });
 
     if (error) return NextResponse.json({ success: false, message: error.message }, { status: 500 });
 

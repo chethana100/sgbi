@@ -195,6 +195,7 @@ enum ProductType {
 enum OperationalStatus {
   Working
   Repair
+  Breakdown
   Scrap
 }
 

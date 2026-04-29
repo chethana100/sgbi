@@ -40,9 +40,9 @@ interface Asset {
   last_firmware_updated_by: string;
   last_service_date: string;
   service_reminder_interval_days: number;
-  checked_out_to_user_id: string | null;
-  checked_out_at: string;
-  checked_out_purpose: string;
+  transferred_to_user_id: string | null;
+  transferred_at: string;
+  transferred_purpose: string;
   warranty_expiry_date: string;
   warranty_notes: string;
   image_urls: string[];
@@ -69,12 +69,15 @@ export default function AssetDetailPage() {
   const [actionLoading, setActionLoading] = useState(false);
 
   const [editModal, setEditModal] = useState(false);
-  const [checkoutModal, setCheckoutModal] = useState(false);
+  const [transferModal, setTransferModal] = useState(false);
   const [warrantyModal, setWarrantyModal] = useState(false);
   const [historyModal, setHistoryModal] = useState(false);
+  const [statusModal, setStatusModal] = useState(false);
+  const [newStatus, setNewStatus] = useState("");
 
   const [editForm, setEditForm] = useState({ status: "", customer: "", remarks: "" });
-  const [checkoutPurpose, setCheckoutPurpose] = useState("");
+  const [transferPurpose, setTransferPurpose] = useState("");
+  const [transferRemark, setTransferRemark] = useState("");
   const [warrantyForm, setWarrantyForm] = useState({ expiry: "", notes: "" });
   const [history, setHistory] = useState<any[]>([]);
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -106,8 +109,8 @@ export default function AssetDetailPage() {
           expiry: data.data.warranty_expiry_date ? data.data.warranty_expiry_date.split("T")[0] : "",
           notes: data.data.warranty_notes || ""
         });
-        if (data.data.checked_out_to_user_id) {
-          fetchCheckedOutUser(data.data.checked_out_to_user_id);
+        if (data.data.transferred_to_user_id) {
+          fetchCheckedOutUser(data.data.transferred_to_user_id);
         } else {
           setCheckedOutUser(null);
         }
@@ -145,9 +148,9 @@ export default function AssetDetailPage() {
       if (data.success) {
         setRefreshKey(prev => prev + 1);
         setEditModal(false);
-        setCheckoutModal(false);
+        setTransferModal(false);
         setWarrantyModal(false);
-        setCheckoutPurpose("");
+        setTransferPurpose("");
       } else {
         alert(data.message || "Action failed");
       }
@@ -211,7 +214,7 @@ export default function AssetDetailPage() {
     </div>
   );
 
-  const isCheckedOut = !!asset.checked_out_to_user_id;
+  const isCheckedOut = !!asset.transferred_to_user_id;
 
   return (
     <div className="space-y-6 pb-12">
@@ -237,6 +240,9 @@ export default function AssetDetailPage() {
           <Button variant="outline" size="sm" onClick={fetchHistory}>
             <History size={14} className="mr-2" />History
           </Button>
+          <Button size="sm" variant="outline" onClick={() => { setNewStatus(asset.operational_status); setStatusModal(true); }}>
+            <Package size={14} className="mr-2" />Status
+          </Button>
           <Button size="sm" className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white" onClick={() => setEditModal(true)}>
             <Edit2 size={14} className="mr-2" />Edit
           </Button>
@@ -251,15 +257,15 @@ export default function AssetDetailPage() {
             <Card>
               <CardContent className="p-5 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${asset.operational_status === "Working" ? "bg-green-50" : asset.operational_status === "Repair" ? "bg-amber-50" : "bg-red-50"}`}>
-                    <Package size={20} className={asset.operational_status === "Working" ? "text-green-600" : asset.operational_status === "Repair" ? "text-amber-600" : "text-red-600"} />
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${asset.operational_status === "Working" ? "bg-green-50" : asset.operational_status === "Breakdown" ? "bg-amber-50" : "bg-red-50"}`}>
+                    <Package size={20} className={asset.operational_status === "Working" ? "text-green-600" : asset.operational_status === "Breakdown" ? "text-amber-600" : "text-red-600"} />
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Status</p>
                     <p className="text-lg font-semibold">{asset.operational_status}</p>
                   </div>
                 </div>
-                <Badge className={asset.operational_status === "Working" ? "bg-green-100 text-green-700" : asset.operational_status === "Repair" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}>
+                <Badge className={asset.operational_status === "Working" ? "bg-green-100 text-green-700" : asset.operational_status === "Breakdown" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}>
                   {asset.operational_status}
                 </Badge>
               </CardContent>
@@ -376,9 +382,9 @@ export default function AssetDetailPage() {
                 <div className="flex items-end justify-end">
                   <Button size="sm" variant="outline"
                     className="text-xs h-8 border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white"
-                    onClick={() => showConfirm("Reset Service Timer", "Reset service date to today for this unit?", () => handleAction("/service-reset", "POST"))}
+                    onClick={() => showConfirm("Service Done", "Reset service date to today for this unit?", () => handleAction("/service-reset", "POST"))}
                     disabled={actionLoading}>
-                    Reset Timer
+                    Service Done
                   </Button>
                 </div>
               </div>
@@ -414,7 +420,7 @@ export default function AssetDetailPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {asset.image_urls.map((url, i) => (
                     <div key={i} className="relative group rounded-lg overflow-hidden border aspect-square">
-                      <img src={url} alt={`Asset image ${i + 1}`} className="w-full h-full object-cover" />
+                      <img src={url} alt={`Asset image ${i + 1}`} className="w-full h-full object-contain bg-gray-50" />
                       <button
                         onClick={() => handleImageDelete(url)}
                         className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -442,7 +448,7 @@ export default function AssetDetailPage() {
                 {isCheckedOut
                   ? <LogOut size={16} className="text-amber-400" />
                   : <LogIn size={16} className="text-green-600" />}
-                {isCheckedOut ? "Checked Out" : "Available"}
+                {isCheckedOut ? "Transferred" : "Available"}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -465,13 +471,13 @@ export default function AssetDetailPage() {
                       <p className="text-xs opacity-60 font-medium mb-1">Since</p>
                       <p className="text-sm font-medium flex items-center gap-2">
                         <Clock size={12} />
-                        {asset.checked_out_at ? new Date(asset.checked_out_at).toLocaleString() : "Unknown"}
+                        {asset.transferred_at ? new Date(asset.transferred_at).toLocaleString() : "Unknown"}
                       </p>
                     </div>
-                    {asset.checked_out_purpose && (
+                    {asset.transferred_purpose && (
                       <div>
                         <p className="text-xs opacity-60 font-medium mb-1">Purpose</p>
-                        <p className="text-sm italic opacity-80">{asset.checked_out_purpose}</p>
+                        <p className="text-sm italic opacity-80">{asset.transferred_purpose}</p>
                       </div>
                     )}
                   </div>
@@ -490,8 +496,8 @@ export default function AssetDetailPage() {
                   </div>
                   <Button
                     className="w-full bg-[#29ABE2] hover:bg-[#1a96cc] text-white"
-                    onClick={() => setCheckoutModal(true)}>
-                    <LogOut size={16} className="mr-2" />Check Out
+                    onClick={() => setTransferModal(true)}>
+                    <LogOut size={16} className="mr-2" />Transfer
                   </Button>
                 </div>
               )}
@@ -542,7 +548,7 @@ export default function AssetDetailPage() {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Working">Working</SelectItem>
-                  <SelectItem value="Repair">Repair</SelectItem>
+                  <SelectItem value="Breakdown">Breakdown</SelectItem>
                   <SelectItem value="Scrap">Scrap</SelectItem>
                 </SelectContent>
               </Select>
@@ -579,28 +585,35 @@ export default function AssetDetailPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={checkoutModal} onOpenChange={setCheckoutModal}>
-        <DialogContent>
+      <Dialog open={transferModal} onOpenChange={setTransferModal}>
+        <DialogContent className="bg-white dark:bg-gray-900">
           <DialogHeader>
-            <DialogTitle>Check Out Asset</DialogTitle>
-            <DialogDescription>This asset will be assigned to you.</DialogDescription>
+            <DialogTitle>Transfer Asset</DialogTitle>
+            <DialogDescription>Transfer this asset to a new location or person.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Purpose</Label>
+              <Label>Transfer To (Location/Person) *</Label>
+              <Input
+                value={transferPurpose}
+                onChange={(e) => setTransferPurpose(e.target.value)}
+                placeholder="e.g., Cochin Lab, John Smith, US Office..." />
+            </div>
+            <div className="space-y-2">
+              <Label>Remarks</Label>
               <Textarea
-                value={checkoutPurpose}
-                onChange={(e) => setCheckoutPurpose(e.target.value)}
-                placeholder="e.g., On-site deployment, Lab testing..." />
+                value={transferRemark}
+                onChange={(e) => setTransferRemark(e.target.value)}
+                placeholder="Reason for transfer, any notes..." />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCheckoutModal(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setTransferModal(false)}>Cancel</Button>
             <Button
               className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white"
-              onClick={() => handleAction("/checkout", "POST", { purpose: checkoutPurpose })}
-              disabled={actionLoading || !checkoutPurpose.trim()}>
-              Check Out
+              onClick={() => handleAction("/checkout", "POST", { purpose: transferPurpose, notes: transferRemark })}
+              disabled={actionLoading || !transferPurpose.trim()}>
+              Transfer
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -673,6 +686,28 @@ export default function AssetDetailPage() {
         </DialogContent>
       </Dialog>
 
+
+      <Dialog open={statusModal} onOpenChange={setStatusModal}>
+        <DialogContent className="sm:max-w-sm bg-white dark:bg-gray-900">
+          <DialogHeader><DialogTitle>Change Status</DialogTitle></DialogHeader>
+          <div className="space-y-3 py-4">
+            {["Working", "Breakdown", "Scrap"].map(s => (
+              <button key={s} onClick={() => setNewStatus(s)}
+                className={`w-full p-3 rounded-xl border-2 text-left font-medium transition-all ${newStatus === s ? "border-[#29ABE2] bg-[#29ABE2]/5" : "border-gray-100 hover:border-gray-200"}`}>
+                <span className={`inline-block w-2 h-2 rounded-full mr-2 ${s === "Working" ? "bg-green-500" : s === "Breakdown" ? "bg-amber-500" : "bg-red-500"}`} />
+                {s}
+              </button>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setStatusModal(false)}>Cancel</Button>
+            <Button className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white" disabled={actionLoading}
+              onClick={() => { handleAction("", "PATCH", { operational_status: newStatus }); setStatusModal(false); }}>
+              Update Status
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog(prev => ({ ...prev, open }))}>
         <DialogContent className="sm:max-w-sm">
