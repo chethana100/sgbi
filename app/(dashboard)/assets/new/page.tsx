@@ -154,6 +154,9 @@ export default function AddAssetPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (!form.product_id) { setError("Please select a product."); return; }
+    if (!form.serial_number) { setError("Serial number is required."); return; }
+    if (!form.current_location_id) { setError("Please select a location."); return; }
     setSubmitting(true);
     try {
       const res = await fetch("/api/assets", {

@@ -3,7 +3,7 @@ import { LocationProvider } from "@/lib/location-context";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import {
-  LayoutDashboard, Package, LogOut, Bell,
+  LayoutDashboard, Package, LogOut, Bell, Clock,
   Shield, Menu, X, Loader2, ChevronRight,
   MapPin, ChevronDown, Settings, Moon, Sun
 } from "lucide-react";
@@ -18,6 +18,7 @@ const navItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Assets", href: "/assets", icon: Package },
   { name: "Alerts", href: "/alerts", icon: Bell },
+  { name: "Activity", href: "/activity", icon: Clock },
   { name: "Admin", href: "/admin", icon: Shield, adminOnly: true },
 ];
 
