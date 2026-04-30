@@ -74,6 +74,8 @@ export default function AssetDetailPage() {
   const [historyModal, setHistoryModal] = useState(false);
   const [statusModal, setStatusModal] = useState(false);
   const [newStatus, setNewStatus] = useState("");
+  const [serviceRemark, setServiceRemark] = useState("");
+  const [manualNote, setManualNote] = useState("");
 
   const [editForm, setEditForm] = useState({ status: "", customer: "", remarks: "" });
   const [transferPurpose, setTransferPurpose] = useState("");
@@ -383,7 +385,7 @@ export default function AssetDetailPage() {
                   <Button size="sm" variant="outline"
                     className="text-xs h-8 border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white"
                     onClick={() => showConfirm("Service Done", "Reset service date to today for this unit?", () => handleAction("/service-reset", "POST"))}
-                    disabled={actionLoading}>
+                    disabled={actionLoading || (!asset.service_due && asset.operational_status !== "Breakdown")}>
                     Service Done
                   </Button>
                 </div>
@@ -680,7 +682,29 @@ export default function AssetDetailPage() {
               )}
             </div>
           </div>
-          <DialogFooter className="pt-4 border-t">
+          <div className="pt-4 border-t space-y-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Add Manual Note</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={manualNote}
+                onChange={e => setManualNote(e.target.value)}
+                placeholder="Type a note for this asset..."
+                className="flex-1 h-9 px-3 text-sm border rounded-lg focus:outline-none focus:border-[#29ABE2]"
+              />
+              <button
+                onClick={async () => {
+                  if (!manualNote.trim()) return;
+                  await fetch("/api/assets/" + id + "/notes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ note: manualNote }) });
+                  setManualNote("");
+                  fetchHistory();
+                }}
+                className="px-4 h-9 bg-[#29ABE2] text-white text-sm rounded-lg hover:bg-[#1a96cc] transition-colors">
+                Add
+              </button>
+            </div>
+          </div>
+          <DialogFooter className="pt-2">
             <Button onClick={() => setHistoryModal(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
@@ -691,18 +715,30 @@ export default function AssetDetailPage() {
         <DialogContent className="sm:max-w-sm bg-white dark:bg-gray-900">
           <DialogHeader><DialogTitle>Change Status</DialogTitle></DialogHeader>
           <div className="space-y-3 py-4">
-            {["Working", "Breakdown", "Scrap"].map(s => (
+            {["Working", "Breakdown", "Scrap", "Service"].map(s => (
               <button key={s} onClick={() => setNewStatus(s)}
                 className={`w-full p-3 rounded-xl border-2 text-left font-medium transition-all ${newStatus === s ? "border-[#29ABE2] bg-[#29ABE2]/5" : "border-gray-100 hover:border-gray-200"}`}>
-                <span className={`inline-block w-2 h-2 rounded-full mr-2 ${s === "Working" ? "bg-green-500" : s === "Breakdown" ? "bg-amber-500" : "bg-red-500"}`} />
+                <span className={`inline-block w-2 h-2 rounded-full mr-2 ${s === "Working" ? "bg-green-500" : s === "Breakdown" ? "bg-amber-500" : s === "Service" ? "bg-blue-500" : "bg-red-500"}`} />
                 {s}
+                {s === "Service" && <span className="text-xs text-muted-foreground ml-2">(resets service timer)</span>}
               </button>
             ))}
+            {newStatus === "Service" && (
+              <div className="space-y-2 mt-2">
+                <label className="text-sm font-medium">Service Remarks</label>
+                <textarea
+                  value={serviceRemark}
+                  onChange={e => setServiceRemark(e.target.value)}
+                  placeholder="Describe the service performed..."
+                  className="w-full h-20 px-3 py-2 text-sm border rounded-xl resize-none focus:outline-none focus:border-[#29ABE2]"
+                />
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setStatusModal(false)}>Cancel</Button>
             <Button className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white" disabled={actionLoading}
-              onClick={() => { handleAction("", "PATCH", { operational_status: newStatus }); setStatusModal(false); }}>
+              onClick={() => { if (newStatus === "Service") { handleAction("/service-reset", "POST", { notes: serviceRemark }); } else { handleAction("", "PATCH", { operational_status: newStatus }); } setStatusModal(false); }}>
               Update Status
             </Button>
           </DialogFooter>
