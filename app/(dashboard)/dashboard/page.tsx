@@ -42,7 +42,7 @@ interface Location {
 }
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState({ working: 0, breakdown: 0, serviceDue: 0, updatesAvailable: 0, total: 0 });
+  const [stats, setStats] = useState({ working: 0, breakdown: 0, scrap: 0, serviceDue: 0, updatesAvailable: 0, total: 0 });
   const [recentAssets, setRecentAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const { selectedLocationId, selectedLocationName } = useLocation();
@@ -98,6 +98,7 @@ export default function DashboardPage() {
           total: all.length,
           working: all.filter(a => a.operational_status === "Working" && !a.service_due).length,
           breakdown: all.filter(a => a.operational_status === "Breakdown").length,
+          scrap: all.filter(a => a.operational_status === "Scrap").length,
           serviceDue: all.filter(a => a.service_due).length,
           updatesAvailable: all.filter(a => a.firmware_update_available).length,
         });
@@ -184,11 +185,12 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {[
           { label: "Working", value: stats.working, icon: Package, color: "text-green-600", bg: "bg-green-50", badge: "Active", badgeColor: "text-green-600 bg-green-50", href: "/assets?status=Working" },
           { label: "Breakdown", value: stats.breakdown, icon: Wrench, color: "text-amber-600", bg: "bg-amber-50", badge: "Repair", badgeColor: "text-amber-600 bg-amber-50", href: "/assets?status=Breakdown" },
-          { label: "Service Due", value: stats.serviceDue, icon: Clock, color: "text-red-500", bg: "bg-red-50", badge: stats.serviceDue > 0 ? "Alert" : null, badgeColor: "text-red-600 bg-red-50", href: "/alerts" },
+          { label: "Scrap", value: stats.scrap, icon: Package, color: "text-gray-500", bg: "bg-gray-100", badge: "Scrap", badgeColor: "text-gray-600 bg-gray-100", href: "/assets?status=Scrap" },
+          { label: "Service Due", value: stats.serviceDue, icon: Clock, color: "text-red-500", bg: "bg-red-50", badge: "Service", badgeColor: "text-red-600 bg-red-50", href: "/alerts" },
           { label: "Updates Available", value: stats.updatesAvailable, icon: Zap, color: "text-[#29ABE2]", bg: "bg-sky-50", badge: stats.updatesAvailable > 0 ? "New" : null, badgeColor: "text-[#29ABE2] bg-sky-50", href: "/alerts" },
         ].map((tile) => (
           <Link key={tile.label} href={tile.href}>
