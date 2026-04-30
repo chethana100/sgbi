@@ -354,7 +354,7 @@ export default function AddAssetPage() {
 
               <div className="space-y-2">
                 <Label>Current Status</Label>
-                <Select value={form.operational_status} onValueChange={v => setForm(p => ({ ...p, operational_status: v }))}>
+                <Select value={form.operational_status} onValueChange={v => setForm(p => ({ ...p, operational_status: v || "Working" }))}>
                   <SelectTrigger id="status" className="h-10">
                     <SelectValue placeholder="Condition" />
                   </SelectTrigger>
