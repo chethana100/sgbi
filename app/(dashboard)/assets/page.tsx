@@ -413,7 +413,7 @@ function AssetsContent() {
               <Select value={addForm.product_id} onValueChange={(v) => {
                 if (v === "__add_new__") { setShowAddProduct(true); return; }
                 const p = products.find(x => x.product_id === v);
-                setAddForm(f => ({ ...f, product_id: v, serial_number: p?.serial_prefix || "" }));
+                setAddForm(f => ({ ...f, product_id: v ?? "", serial_number: p?.serial_prefix || "" }));
               }}>
                 <SelectTrigger className="mt-1"><SelectValue placeholder="Select product" /></SelectTrigger>
                 <SelectContent>
