@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Asset {
   asset_id: string;
@@ -56,6 +57,7 @@ function AssetsContent() {
   const { selectedLocationId } = useLocation();
   const { data: session } = useSession();
   const isAdmin = (session?.user as any)?.role === "admin";
+  const router = useRouter();
 
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
