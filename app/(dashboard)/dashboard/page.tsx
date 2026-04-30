@@ -409,7 +409,7 @@ export default function DashboardPage() {
             {/* Status */}
             <div>
               <Label>Status</Label>
-              <Select value={addForm.operational_status} onValueChange={(v) => setAddForm(f => ({ ...f, operational_status: v }))}>
+              <Select value={addForm.operational_status} onValueChange={(v) => setAddForm(f => ({ ...f, operational_status: v ?? "" }))}>
                 <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent className="bg-white dark:bg-gray-900">
                   <SelectItem value="Working">Working</SelectItem>
@@ -447,7 +447,7 @@ export default function DashboardPage() {
             <div><Label>Serial Prefix</Label><Input className="mt-1" placeholder="e.g. qtap" value={newProduct.serial_prefix} onChange={e => setNewProduct(p => ({ ...p, serial_prefix: e.target.value }))} /></div>
             <div>
               <Label>Type</Label>
-              <Select value={newProduct.product_type} onValueChange={v => setNewProduct(p => ({ ...p, product_type: v }))}>
+              <Select value={newProduct.product_type} onValueChange={v => setNewProduct(p => ({ ...p, product_type: v ?? "accessory" ?? "" }))}>
                 <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent className="bg-white dark:bg-gray-900">
                   <SelectItem value="accessory">Accessory</SelectItem>
@@ -471,7 +471,7 @@ export default function DashboardPage() {
             <div><Label>Location Name *</Label><Input className="mt-1" value={newLocation.name} onChange={e => setNewLocation(l => ({ ...l, name: e.target.value }))} /></div>
             <div>
               <Label>Parent Location</Label>
-              <Select value={newLocation.parent_location_id} onValueChange={v => setNewLocation(l => ({ ...l, parent_location_id: v }))}>
+              <Select value={newLocation.parent_location_id} onValueChange={v => setNewLocation(l => ({ ...l, parent_location_id: v ?? "" }))}>
                 <SelectTrigger className="mt-1"><SelectValue placeholder="None (root level)" /></SelectTrigger>
                 <SelectContent className="bg-white dark:bg-gray-900">
                   <SelectItem value="">None (root level)</SelectItem>

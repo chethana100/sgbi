@@ -354,7 +354,7 @@ export default function AddAssetPage() {
 
               <div className="space-y-2">
                 <Label>Current Status</Label>
-                <Select value={form.operational_status} onValueChange={v => setForm(p => ({ ...p, operational_status: v || "Working" }))}>
+                <Select value={form.operational_status} onValueChange={v => setForm(p => ({ ...p, operational_status: v ?? "" || "Working" }))}>
                   <SelectTrigger id="status" className="h-10">
                     <SelectValue placeholder="Condition" />
                   </SelectTrigger>
@@ -464,7 +464,7 @@ export default function AddAssetPage() {
             <div><Label>Serial Prefix</Label><Input className="mt-1" placeholder="e.g. qtap" value={newProduct.serial_prefix} onChange={e => setNewProduct(p => ({ ...p, serial_prefix: e.target.value }))} /></div>
             <div>
               <Label>Type</Label>
-              <Select value={newProduct.product_type} onValueChange={(v: string | null) => setNewProduct(p => ({ ...p, product_type: v ?? "accessory" }))}>
+              <Select value={newProduct.product_type} onValueChange={(v: string | null) => setNewProduct(p => ({ ...p, product_type: v ?? "accessory" ?? "accessory" }))}>
                 <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent className="bg-white dark:bg-gray-900">
                   <SelectItem value="accessory">Accessory</SelectItem>

@@ -433,7 +433,7 @@ function AssetsContent() {
               <Label>Initial Location *</Label>
               <Select value={addForm.current_location_id} onValueChange={(v) => {
                 if (v === "__add_location__") { setShowAddLocation(true); return; }
-                setAddForm(f => ({ ...f, current_location_id: v }));
+                setAddForm(f => ({ ...f, current_location_id: v ?? "" }));
               }}>
                 <SelectTrigger className="mt-1"><SelectValue placeholder="Select location..." /></SelectTrigger>
                 <SelectContent>
@@ -458,7 +458,7 @@ function AssetsContent() {
             </div>
             <div>
               <Label>Status</Label>
-              <Select value={addForm.operational_status} onValueChange={(v) => setAddForm(f => ({ ...f, operational_status: v }))}>
+              <Select value={addForm.operational_status} onValueChange={(v) => setAddForm(f => ({ ...f, operational_status: v ?? "" }))}>
                 <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Working">Working</SelectItem>
@@ -493,7 +493,7 @@ function AssetsContent() {
             <div><Label>Serial Prefix</Label><Input className="mt-1" placeholder="e.g. qtap" value={newProduct.serial_prefix} onChange={e => setNewProduct(p => ({ ...p, serial_prefix: e.target.value }))} /></div>
             <div>
               <Label>Type</Label>
-              <Select value={newProduct.product_type} onValueChange={v => setNewProduct(p => ({ ...p, product_type: v }))}>
+              <Select value={newProduct.product_type} onValueChange={v => setNewProduct(p => ({ ...p, product_type: v ?? "accessory" ?? "" }))}>
                 <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="accessory">Accessory</SelectItem>
@@ -517,7 +517,7 @@ function AssetsContent() {
             <div><Label>Location Name *</Label><Input className="mt-1" value={newLocation.name} onChange={e => setNewLocation(l => ({ ...l, name: e.target.value }))} /></div>
             <div>
               <Label>Parent Location</Label>
-              <Select value={newLocation.parent_location_id} onValueChange={v => setNewLocation(l => ({ ...l, parent_location_id: v }))}>
+              <Select value={newLocation.parent_location_id} onValueChange={v => setNewLocation(l => ({ ...l, parent_location_id: v ?? "" }))}>
                 <SelectTrigger className="mt-1"><SelectValue placeholder="None (root level)" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">None (root level)</SelectItem>
