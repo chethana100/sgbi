@@ -278,7 +278,7 @@ export default function DashboardPage() {
             <div>
               <Label>Product *</Label>
               <Popover open={productOpen} onOpenChange={setProductOpen}>
-                <PopoverTrigger asChild>
+                <PopoverTrigger>
                   <Button variant="outline" role="combobox" className="w-full mt-1 justify-between font-normal">
                     {selectedProduct ? `${selectedProduct.product_name} — ${selectedProduct.erp_part_number}` : "Select product..."}
                     <ChevronsUpDown size={14} className="opacity-50" />
@@ -323,7 +323,7 @@ export default function DashboardPage() {
             <div>
               <Label>Initial Location *</Label>
               <Popover open={locationOpen} onOpenChange={setLocationOpen}>
-                <PopoverTrigger asChild>
+                <PopoverTrigger>
                   <Button variant="outline" role="combobox" className="w-full mt-1 justify-between font-normal">
                     {selectedLocation ? selectedLocation.full_path || selectedLocation.name : "Select location..."}
                     <ChevronsUpDown size={14} className="opacity-50" />
@@ -361,7 +361,7 @@ export default function DashboardPage() {
             <div>
               <Label>Customer</Label>
               <Popover open={customerOpen} onOpenChange={setCustomerOpen}>
-                <PopoverTrigger asChild>
+                <PopoverTrigger>
                   <Button variant="outline" role="combobox" className="w-full mt-1 justify-between font-normal">
                     {addForm.customer || "Select or type customer..."}
                     <ChevronsUpDown size={14} className="opacity-50" />
