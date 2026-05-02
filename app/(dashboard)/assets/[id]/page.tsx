@@ -385,7 +385,7 @@ export default function AssetDetailPage() {
                   <Button size="sm" variant="outline"
                     className="text-xs h-8 border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white"
                     onClick={() => showConfirm("Service Done", "Reset service date to today for this unit?", () => handleAction("/service-reset", "POST"))}
-                    disabled={actionLoading || (!asset.service_due && asset.operational_status !== "Breakdown")}>
+                    disabled={actionLoading || (!asset.service_due && asset.operational_status !== "Breakdown" && asset.operational_status !== "Service")}>
                     Service Done
                   </Button>
                 </div>
@@ -738,7 +738,7 @@ export default function AssetDetailPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setStatusModal(false)}>Cancel</Button>
             <Button className="bg-[#29ABE2] hover:bg-[#1a96cc] text-white" disabled={actionLoading}
-              onClick={() => { if (newStatus === "Service") { handleAction("/service-reset", "POST", { notes: serviceRemark }); } else { handleAction("", "PATCH", { operational_status: newStatus }); } setStatusModal(false); }}>
+              onClick={() => { if (newStatus === "Service") { handleAction("", "PATCH", { operational_status: "Service", notes: serviceRemark }); } else { handleAction("", "PATCH", { operational_status: newStatus }); } setStatusModal(false); }}>
               Update Status
             </Button>
           </DialogFooter>

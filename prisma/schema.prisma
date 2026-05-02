@@ -196,6 +196,7 @@ enum OperationalStatus {
   Working
   Repair
   Breakdown
+  Service
   Scrap
 }
 

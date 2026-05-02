@@ -99,7 +99,7 @@ export default function DashboardPage() {
           working: all.filter(a => a.operational_status === "Working" && !a.service_due).length,
           breakdown: all.filter(a => a.operational_status === "Breakdown").length,
           scrap: all.filter(a => a.operational_status === "Scrap").length,
-          serviceDue: all.filter(a => a.service_due).length,
+          serviceDue: all.filter(a => a.service_due || a.operational_status === "Service").length,
           updatesAvailable: all.filter(a => a.firmware_update_available).length,
         });
         setRecentAssets([...all].sort((a, b) => new Date(b.last_modified_at).getTime() - new Date(a.last_modified_at).getTime()).slice(0, 8));

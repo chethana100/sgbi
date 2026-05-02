@@ -264,7 +264,7 @@ function AssetsContent() {
                   <TableHead className="w-[280px]">
                     <div className="flex flex-col gap-1 py-1">
                       <span className="text-xs font-semibold">Product / Serial</span>
-                      <select className="h-6 text-[10px] border rounded px-1 w-full bg-background"
+                      <select className="h-6 text-[10px] border rounded px-1 w-full bg-background dark:bg-gray-900 dark:text-white dark:border-gray-700"
                         value={productFilter} onChange={e => setProductFilter(e.target.value)}>
                         <option value="all">All</option>
                         {[...new Set(assets.map(a => a.product_name).filter(Boolean))].map(p => (
@@ -276,7 +276,7 @@ function AssetsContent() {
                   <TableHead>
                     <div className="flex flex-col gap-1 py-1">
                       <span className="text-xs font-semibold">Initial Location</span>
-                      <select className="h-6 text-[10px] border rounded px-1 w-full bg-background"
+                      <select className="h-6 text-[10px] border rounded px-1 w-full bg-background dark:bg-gray-900 dark:text-white dark:border-gray-700"
                         value={locationFilter} onChange={e => setLocationFilter(e.target.value)}>
                         <option value="all">All</option>
                         {[...new Set(assets.map(a => a.current_location_display).filter(Boolean))].map(loc => (
@@ -288,7 +288,7 @@ function AssetsContent() {
                   <TableHead>
                     <div className="flex flex-col gap-1 py-1">
                       <span className="text-xs font-semibold">Customer</span>
-                      <select className="h-6 text-[10px] border rounded px-1 w-full bg-background"
+                      <select className="h-6 text-[10px] border rounded px-1 w-full bg-background dark:bg-gray-900 dark:text-white dark:border-gray-700"
                         value={customerFilter} onChange={e => setCustomerFilter(e.target.value)}>
                         <option value="all">All</option>
                         {uniqueCustomers.map(c => (
@@ -300,7 +300,7 @@ function AssetsContent() {
                   <TableHead>
                     <div className="flex flex-col gap-1 py-1">
                       <span className="text-xs font-semibold">Status</span>
-                      <select className="h-6 text-[10px] border rounded px-1 w-full bg-background"
+                      <select className="h-6 text-[10px] border rounded px-1 w-full bg-background dark:bg-gray-900 dark:text-white dark:border-gray-700"
                         value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
                         <option value="all">All</option>
                         <option value="Working">Working</option>
@@ -312,7 +312,7 @@ function AssetsContent() {
                   <TableHead>
                     <div className="flex flex-col gap-1 py-1">
                       <span className="text-xs font-semibold">Firmware & Service</span>
-                      <select className="h-6 text-[10px] border rounded px-1 w-full bg-background"
+                      <select className="h-6 text-[10px] border rounded px-1 w-full bg-background dark:bg-gray-900 dark:text-white dark:border-gray-700"
                         value={fwFilter} onChange={e => setFwFilter(e.target.value)}>
                         <option value="all">All</option>
                         <option value="update">FW Update</option>
