@@ -177,7 +177,7 @@ export default function AssetDetailPage() {
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !asset) return;
     setUploadingImage(true);
     try {
       const formData = new FormData();
