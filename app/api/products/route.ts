@@ -17,7 +17,7 @@ export async function GET() {
             orderBy: { product_name: "asc" },
         });
 
-        return NextResponse.json({ success: true, data: products });
+        return NextResponse.json({ success: true, data: products }, { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } });
     } catch (error) {
         console.error("GET /api/products error:", error);
         return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500 });

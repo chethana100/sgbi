@@ -12,7 +12,7 @@ export async function GET() {
             include: { product: true },
         });
 
-        return NextResponse.json({ success: true, data: firmware });
+        return NextResponse.json({ success: true, data: firmware }, { headers: { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600" } });
     } catch (error) {
         console.error("GET /api/firmware-master error:", error);
         return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500 });
