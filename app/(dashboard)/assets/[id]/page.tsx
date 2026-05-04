@@ -52,6 +52,7 @@ interface Asset {
   firmware_update_available: boolean;
   service_due: boolean;
   product_image: string | null;
+  product_id: string;
 }
 
 interface CheckedOutUser {
