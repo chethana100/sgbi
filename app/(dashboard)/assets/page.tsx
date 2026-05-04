@@ -35,6 +35,7 @@ interface Asset {
   erp_part_number: string;
   product_type: string;
   remarks: string | null;
+  product_image: string | null;
 }
 
 interface Product {
@@ -356,8 +357,10 @@ function AssetsContent() {
                           onClick={() => window.location.href = `/assets/${asset.asset_id}`}>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-[#29ABE2]/5 flex items-center justify-center shrink-0 border border-[#29ABE2]/10">
-                                <Package size={14} className="text-[#29ABE2]" />
+                              <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-[#29ABE2]/10 bg-gray-50 flex items-center justify-center">
+                                {asset.product_image
+                                  ? <img src={asset.product_image} alt={asset.product_name} className="w-full h-full object-contain" />
+                                  : <Package size={14} className="text-[#29ABE2]" />}
                               </div>
                               <div>
                                 <p className="text-sm font-semibold leading-none">{asset.product_name}</p>

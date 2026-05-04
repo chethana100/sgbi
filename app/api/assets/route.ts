@@ -59,6 +59,8 @@ export async function GET(req: NextRequest) {
         ]);
 
         const firmwareMasters = await prisma.firmwareMaster.findMany();
+        const productImages = await prisma.product.findMany({ select: { product_id: true, image: true } });
+        const imageMap = new Map(productImages.map(p => [p.product_id, p.image]));
         const fwMap = new Map(firmwareMasters.map((f) => [f.product_id, f.latest_version]));
 
         const today = new Date();
@@ -71,7 +73,7 @@ export async function GET(req: NextRequest) {
             const service_due = daysSinceService !== null
                 ? daysSinceService > asset.service_reminder_interval_days
                 : false;
-            return { ...asset, firmware_update_available, service_due };
+            return { ...asset, firmware_update_available, service_due, product_image: imageMap.get(asset.product_id) || null };
         });
 
         const filtered = enriched.filter((a) => {

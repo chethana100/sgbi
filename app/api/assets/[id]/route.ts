@@ -17,6 +17,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     if (!asset) return NextResponse.json({ success: false, message: "Asset not found" }, { status: 404 });
 
     const fw = await prisma.firmwareMaster.findUnique({ where: { product_id: asset.product_id } });
+    const product = await prisma.product.findUnique({ where: { product_id: asset.product_id }, select: { image: true } });
+    const product_image = product?.image || null;
     const firmware_update_available = fw ? asset.current_firmware !== fw.latest_version : false;
     const today = new Date();
     const daysSinceService = asset.last_service_date
@@ -24,7 +26,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       : null;
     const service_due = daysSinceService !== null ? daysSinceService > asset.service_reminder_interval_days : false;
 
-    return NextResponse.json({ success: true, data: { ...asset, firmware_update_available, service_due } });
+    return NextResponse.json({ success: true, data: { ...asset, firmware_update_available, service_due, product_image } });
   } catch (error) {
     console.error("GET /api/assets/:id error:", error);
     return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500 });

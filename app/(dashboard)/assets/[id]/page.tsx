@@ -51,6 +51,7 @@ interface Asset {
   enrolled_at: string;
   firmware_update_available: boolean;
   service_due: boolean;
+  product_image: string | null;
 }
 
 interface CheckedOutUser {
@@ -181,7 +182,7 @@ export default function AssetDetailPage() {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch("/api/assets/" + id + "/images", {
+      const res = await fetch("/api/products/" + asset.product_id + "/image", {
         method: "POST",
         body: formData,
       });
@@ -418,9 +419,15 @@ export default function AssetDetailPage() {
               </label>
             </CardHeader>
             <CardContent className="pt-4">
-              {asset.image_urls && asset.image_urls.length > 0 ? (
+              {(asset.product_image || (asset.image_urls && asset.image_urls.length > 0)) ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {asset.image_urls.map((url, i) => (
+                  {asset.product_image && (
+                    <div className="relative rounded-lg overflow-hidden border aspect-square bg-gray-50">
+                      <img src={asset.product_image} alt={asset.product_name} className="w-full h-full object-contain" />
+                      <span className="absolute bottom-1 left-1 text-[10px] bg-black/50 text-white px-1.5 rounded">Model</span>
+                    </div>
+                  )}
+                  {asset.image_urls && asset.image_urls.map((url, i) => (
                     <div key={i} className="relative group rounded-lg overflow-hidden border aspect-square">
                       <img src={url} alt={`Asset image ${i + 1}`} className="w-full h-full object-contain bg-gray-50" />
                       <button
