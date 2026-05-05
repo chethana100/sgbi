@@ -245,10 +245,10 @@ export default function AdminLocationsPage() {
 
       {/* MODAL */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-gray-900 z-50">
           <form onSubmit={handleSubmit}>
             <DialogHeader>
-              <DialogTitle>{editingLoc ? "Rename Location" : "Add Sub-location"}</DialogTitle>
+              <DialogTitle>{editingLoc ? "Rename Location" : form.parent_location_id ? "Add Sub-location" : "Add Root Location"}</DialogTitle>
               <DialogDescription>
                 Organize your assets by defining physical or logical zones.
               </DialogDescription>
@@ -260,7 +260,7 @@ export default function AdminLocationsPage() {
                   <SelectTrigger id="parent">
                     <SelectValue placeholder="No parent (Root)" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white dark:bg-gray-900">
                     <SelectItem value="">No parent (Root Category)</SelectItem>
                     {allLocationsFlat.filter(l => l.location_id !== editingLoc?.location_id).map(l => (
                       <SelectItem key={l.location_id} value={l.location_id}>

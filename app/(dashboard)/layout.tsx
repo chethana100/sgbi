@@ -3,7 +3,7 @@ import { LocationProvider } from "@/lib/location-context";
 import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import {
-  LayoutDashboard, Package, LogOut, Bell, Clock,
+  LayoutDashboard, Package, LogOut, Bell, Clock, Cpu,
   Shield, Menu, X, Loader2, ChevronRight,
   MapPin, ChevronDown, Settings, Moon, Sun
 } from "lucide-react";
@@ -20,6 +20,9 @@ const navItems = [
   { name: "Alerts", href: "/alerts", icon: Bell },
   { name: "Activity", href: "/activity", icon: Clock },
   { name: "Admin", href: "/admin", icon: Shield, adminOnly: true },
+  { name: "Products", href: "/admin/products", icon: Package, adminOnly: true },
+  { name: "Firmware", href: "/admin/firmware", icon: Cpu, adminOnly: true },
+  { name: "Locations", href: "/admin/locations", icon: MapPin, adminOnly: true },
 ];
 
 function LocationPicker() {

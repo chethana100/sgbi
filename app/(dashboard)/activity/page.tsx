@@ -23,6 +23,7 @@ const actionConfig: Record<string, { label: string; color: string; icon: any }> 
   ASSET_LOCATION_CHANGED: { label: "Location Changed", color: "bg-purple-100 text-purple-700", icon: MapPin },
   ASSET_ENROLLED: { label: "Asset Enrolled", color: "bg-teal-100 text-teal-700", icon: Plus },
   ASSET_REMARKS_UPDATED: { label: "Remarks Updated", color: "bg-gray-100 text-gray-700", icon: Package },
+  FIRMWARE_MASTER_UPDATED: { label: "Firmware Released", color: "bg-blue-100 text-blue-700", icon: Cpu },
 };
 
 function timeAgo(date: string) {
@@ -38,13 +39,26 @@ export default function ActivityPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [locations, setLocations] = useState<any[]>([]);
 
-  useEffect(() => { fetchActivity(); }, []);
+  const flattenLocs = (locs: any[], depth = 0): any[] =>
+    locs.flatMap((loc: any) => [{ ...loc, depth }, ...flattenLocs(loc.children || [], depth + 1)]);
+
+  useEffect(() => {
+    fetchActivity();
+  }, [locationFilter]);
+
+  useEffect(() => {
+    fetch("/api/locations").then(r => r.json()).then(d => { if (d.success) setLocations(flattenLocs(d.data)); });
+  }, []);
 
   const fetchActivity = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/audit-log?pageSize=50");
+      let url = "/api/audit-log?pageSize=50";
+      if (locationFilter !== "all") url += "&location=" + encodeURIComponent(locationFilter);
+      const res = await fetch(url);
       const data = await res.json();
       if (data.success) setLogs(data.data);
     } catch (e) { console.error(e); }
@@ -52,8 +66,8 @@ export default function ActivityPage() {
   };
 
   const filteredLogs = logs.filter(l => {
-    if (filter === "all") return true;
-    return l.action_type === filter;
+    if (filter !== "all" && l.action_type !== filter) return false;
+    return true;
   });
 
   return (
@@ -67,13 +81,14 @@ export default function ActivityPage() {
       </div>
 
       {/* Filter tabs */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 items-center">
         {[
           { value: "all", label: "All" },
           { value: "ASSET_FIRMWARE_UPDATED", label: "Firmware" },
           { value: "ASSET_SERVICE_RESET", label: "Service" },
           { value: "ASSET_STATUS_CHANGED", label: "Status" },
           { value: "ASSET_ENROLLED", label: "Enrolled" },
+          { value: "FIRMWARE_MASTER_UPDATED", label: "Firmware" },
           { value: "ASSET_LOCATION_CHANGED", label: "Location" },
         ].map(f => (
           <button key={f.value} onClick={() => setFilter(f.value)}
@@ -81,6 +96,11 @@ export default function ActivityPage() {
             {f.label}
           </button>
         ))}
+        <select className="h-8 text-xs border rounded-lg px-2 bg-background dark:bg-gray-900 dark:text-white"
+          value={locationFilter} onChange={e => setLocationFilter(e.target.value)}>
+          <option value="all">All Locations</option>
+          {locations.map((l: any) => <option key={l.location_id} value={l.full_path || l.name}>{l.depth > 0 ? "↳ " : ""}{l.name}</option>)}
+        </select>
       </div>
 
       <Card>

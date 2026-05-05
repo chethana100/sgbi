@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const assetId = searchParams.get("asset_id");
     const actionType = searchParams.get("action_type");
+    const locationFilter = searchParams.get("location") || "";
 
     const where: any = {
       action_type: {
@@ -22,25 +23,32 @@ export async function GET(req: NextRequest) {
           "ASSET_STATUS_CHANGED",
           "ASSET_LOCATION_CHANGED",
           "ASSET_ENROLLED",
-          "ASSET_REMARKS_UPDATED"
+          "ASSET_REMARKS_UPDATED",
+          "FIRMWARE_MASTER_UPDATED"
         ]
       }
     };
+
     if (assetId) where.asset_id = assetId;
     if (actionType) where.action_type = actionType;
 
     const logs = await prisma.auditLog.findMany({
       where,
       orderBy: { performed_at: "desc" },
-      take: pageSize,
+      take: pageSize * 3, // fetch more to allow client filtering
       skip: (page - 1) * pageSize,
       include: {
         performed_by: { select: { name: true, email: true } },
-        asset: { select: { product_name: true, serial_number: true } },
+        asset: { select: { product_name: true, serial_number: true, current_location_display: true } },
       },
     });
 
-    return NextResponse.json({ success: true, data: logs });
+    // Filter by location if specified
+    const filtered = locationFilter
+      ? logs.filter(l => l.asset?.current_location_display?.includes(locationFilter))
+      : logs;
+
+    return NextResponse.json({ success: true, data: filtered.slice(0, pageSize) });
   } catch (error) {
     console.error("audit log error:", error);
     return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500 });

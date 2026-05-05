@@ -18,7 +18,7 @@ export async function sendEmail({
       "api-key": BREVO_API_KEY,
     },
     body: JSON.stringify({
-      sender: { name: "SGBI Asset Tracker", email: "chethananair100@gmail.com" },
+      sender: { name: "SGBI Asset Tracker", email: "sgbiassettracker@gmail.com" },
       to: [{ email: to, name: toName }],
       subject,
       htmlContent: html,

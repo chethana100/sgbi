@@ -84,6 +84,22 @@ function AssetsContent() {
 
   useEffect(() => { fetchAssets(); }, [statusFilter, selectedLocationId]);
   useEffect(() => {
+    if (selectedLocationId) {
+      const loc = flatLocations.find((l: any) => l.location_id === selectedLocationId);
+      if (loc) setLocationFilter(loc.full_path || loc.name);
+    } else {
+      setLocationFilter("all");
+    }
+  }, [selectedLocationId, locations]);
+  useEffect(() => {
+    if (selectedLocationId) {
+      const loc = flatLocations.find((l: any) => l.location_id === selectedLocationId);
+      if (loc) setLocationFilter(loc.full_path || loc.name);
+    } else {
+      setLocationFilter("all");
+    }
+  }, [selectedLocationId, locations]);
+  useEffect(() => {
     fetch("/api/products").then(r => r.json()).then(d => { if (d.success) setProducts(d.data); });
     fetch("/api/locations").then(r => r.json()).then(d => { if (d.success) setLocations(d.data); });
   }, []);
@@ -120,7 +136,7 @@ function AssetsContent() {
     }
     if (fwFilter === "update" && !a.firmware_update_available) return false;
     if (fwFilter === "ok" && a.firmware_update_available) return false;
-    if (locationFilter !== "all" && a.current_location_display !== locationFilter) return false;
+    if (locationFilter !== "all" && !a.current_location_display?.includes(locationFilter.split(" › ").pop() || "")) return false;
     if (customerFilter !== "all" && a.customer !== customerFilter) return false;
     if (productFilter !== "all" && a.product_name !== productFilter) return false;
     return true;
@@ -280,8 +296,8 @@ function AssetsContent() {
                       <select className="h-6 text-[10px] border rounded px-1 w-full bg-background dark:bg-gray-900 dark:text-white dark:border-gray-700"
                         value={locationFilter} onChange={e => setLocationFilter(e.target.value)}>
                         <option value="all">All</option>
-                        {[...new Set(assets.map(a => a.current_location_display).filter(Boolean))].map(loc => (
-                          <option key={loc} value={loc}>{loc}</option>
+                        {flatLocations.map(loc => (
+                          <option key={loc.location_id} value={loc.full_path || loc.name}>{loc.depth > 0 ? "↳ " : ""}{loc.name}</option>
                         ))}
                       </select>
                     </div>
