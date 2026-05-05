@@ -19,6 +19,17 @@ export default function ForgotPasswordPage() {
     setError("");
     setIsLoading(true);
     try {
+      // Check if email exists in system
+      const checkRes = await fetch("/api/users/check-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const checkData = await checkRes.json();
+        setError("No account found with this email address.");
+        setIsLoading(false);
+        return;
+      }
       await authClient.requestPasswordReset({
         email,
         redirectTo: "/auth/reset-password",
