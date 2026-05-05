@@ -323,6 +323,7 @@ function AssetsContent() {
                         <option value="Working">Working</option>
                         <option value="Breakdown">Breakdown</option>
                         <option value="Scrap">Scrap</option>
+                        <option value="Service">Service</option>
                       </select>
                     </div>
                   </TableHead>

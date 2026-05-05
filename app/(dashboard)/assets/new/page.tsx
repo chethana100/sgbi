@@ -365,6 +365,7 @@ export default function AddAssetPage() {
                     <SelectItem value="Working">Working</SelectItem>
                     <SelectItem value="Breakdown">Breakdown</SelectItem>
                     <SelectItem value="Scrap">Scrap</SelectItem>
+                  <SelectItem value="Service">Service</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
