@@ -25,6 +25,7 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email }),
       });
       const checkData = await checkRes.json();
+      if (!checkData.exists) {
         setError("No account found with this email address.");
         return;
       }
