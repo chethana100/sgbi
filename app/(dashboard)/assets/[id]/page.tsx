@@ -508,7 +508,8 @@ export default function AssetDetailPage() {
                     className="w-full bg-[#29ABE2] hover:bg-[#1a96cc] text-white"
                     onClick={() => setTransferModal(true)}>
                     <LogOut size={16} className="mr-2" />Transfer
-                  </Button>
+                  </Button>}
+                  {isCheckedOut && <Button size="sm" variant="outline" className="border-green-500 text-green-600 hover:bg-green-500 hover:text-white" onClick={() => handleAction("/checkin", "POST")}>Check In</Button>}
                 </div>
               )}
             </CardContent>

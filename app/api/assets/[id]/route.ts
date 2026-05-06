@@ -26,7 +26,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       : null;
     const service_due = daysSinceService !== null ? daysSinceService > asset.service_reminder_interval_days : false;
 
-    return NextResponse.json({ success: true, data: { ...asset, firmware_update_available, service_due, product_image } });
+    return NextResponse.json({ success: true, data: { ...asset, firmware_update_available, service_due, product_image, checked_out_to_user_id: asset.checked_out_to_user_id, checked_out_at: asset.checked_out_at, checked_out_purpose: asset.checked_out_purpose } });
   } catch (error) {
     console.error("GET /api/assets/:id error:", error);
     return NextResponse.json({ success: false, message: "Something went wrong" }, { status: 500 });
