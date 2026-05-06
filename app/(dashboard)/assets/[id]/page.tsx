@@ -40,9 +40,9 @@ interface Asset {
   last_firmware_updated_by: string;
   last_service_date: string;
   service_reminder_interval_days: number;
-  transferred_to_user_id: string | null;
-  transferred_at: string;
-  transferred_purpose: string;
+  checked_out_to_user_id: string | null;
+  checked_out_at: string;
+  checked_out_purpose: string;
   warranty_expiry_date: string;
   warranty_notes: string;
   image_urls: string[];
@@ -113,8 +113,8 @@ export default function AssetDetailPage() {
           expiry: data.data.warranty_expiry_date ? data.data.warranty_expiry_date.split("T")[0] : "",
           notes: data.data.warranty_notes || ""
         });
-        if (data.data.transferred_to_user_id) {
-          fetchCheckedOutUser(data.data.transferred_to_user_id);
+        if (data.data.checked_out_to_user_id) {
+          fetchCheckedOutUser(data.data.checked_out_to_user_id);
         } else {
           setCheckedOutUser(null);
         }
@@ -218,7 +218,7 @@ export default function AssetDetailPage() {
     </div>
   );
 
-  const isCheckedOut = !!asset.transferred_to_user_id;
+  const isCheckedOut = !!asset.checked_out_to_user_id;
 
   return (
     <div className="space-y-6 pb-12">
@@ -481,13 +481,13 @@ export default function AssetDetailPage() {
                       <p className="text-xs opacity-60 font-medium mb-1">Since</p>
                       <p className="text-sm font-medium flex items-center gap-2">
                         <Clock size={12} />
-                        {asset.transferred_at ? new Date(asset.transferred_at).toLocaleString() : "Unknown"}
+                        {asset.checked_out_at ? new Date(asset.checked_out_at).toLocaleString() : "Unknown"}
                       </p>
                     </div>
-                    {asset.transferred_purpose && (
+                    {asset.checked_out_purpose && (
                       <div>
                         <p className="text-xs opacity-60 font-medium mb-1">Purpose</p>
-                        <p className="text-sm italic opacity-80">{asset.transferred_purpose}</p>
+                        <p className="text-sm italic opacity-80">{asset.checked_out_purpose}</p>
                       </div>
                     )}
                   </div>
