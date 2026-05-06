@@ -504,11 +504,17 @@ export default function AssetDetailPage() {
                     <CheckCircle2 size={18} className="text-green-600 shrink-0" />
                     <p className="text-sm text-green-700 font-medium">Available in inventory</p>
                   </div>
-                  <Button
-                    className="w-full bg-[#29ABE2] hover:bg-[#1a96cc] text-white"
-                    onClick={() => setTransferModal(true)}>
-                    <LogOut size={16} className="mr-2" />Transfer
-                  </Button> : <Button size="sm" variant="outline" className="border-green-500 text-green-600 hover:bg-green-500 hover:text-white" onClick={() => handleAction("/checkin", "POST")}>Check In</Button>}
+                  {!isCheckedOut ? (
+                    <Button
+                      className="w-full bg-[#29ABE2] hover:bg-[#1a96cc] text-white"
+                      onClick={() => setTransferModal(true)}>
+                      <LogOut size={16} className="mr-2" />Transfer
+                    </Button>
+                  ) : (
+                    <Button className="w-full border-green-500 text-green-600 hover:bg-green-500 hover:text-white" variant="outline" onClick={() => handleAction("/checkin", "POST")}>
+                      Check In
+                    </Button>
+                  )}
                 </div>
               )}
             </CardContent>
